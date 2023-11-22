@@ -1,8 +1,6 @@
 - 👋 Hi, we're @nefineo-cesab
 - 👀 We're interested in the ecology and distribution of fungi, in particular ectomycorrhizal ones
 - 🌱 We're currently funded by FRB-CESAB / SinBiose / FAPESP / CEBA 
-- 💞️ I’m looking to collaborate on ...
-- 📫 How to reach me ...
 
 <!---
 nefineo-cesab/nefineo-cesab is a ✨ special ✨ repository because its `README.md` (this file) appears on your GitHub profile.

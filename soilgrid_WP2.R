@@ -9,7 +9,7 @@
 # However, there are some empty cells in maps which return “0” values.
 # It is mandatory that raster has 2 degrees of extension.
 # Due to many sites in the ITS2 data set are close to each other...
-# I clustered sites and used the same raster to extract soil values (at 150000m ).
+# I clustered sites and used the same raster to extract soil values (at 150000m).
 
 
 # 1. Open coordinates for ITS2 data #####

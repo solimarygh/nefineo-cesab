@@ -12,12 +12,27 @@
 
 library (readr)
 library (dplyr)
+
+# 1. Leer el archivo con encabezado como normalmente
 datosITS1 <- read_tsv("Data/globfungi_metadata_filtered_complemented_its1_soil.tsv")
-nrow(datosITS1) #2815
+#el nombre de las columnas esta corrida. Para arregalar esso:
+nombres_actuales <- names(datosITS1)
+datosITS1 <- datosITS1 %>% select(-dataset)
+names(datosITS1) <- nombres_actuales
+glimpse(datosITS1)
 
 
 datosITS2 <- read_tsv("Data/globfungi_metadata_filtered_complemented_its2_soil.tsv")
 nrow(datosITS2) #2380
+
+#el nombre de las columnas esta corrida. Para arregalar esso:
+nombres_actuales <- names(datosITS2)
+datosITS2 <- datosITS2 %>% select(-dataset)
+names(datosITS2) <- nombres_actuales
+glimpse(datosITS2)
+
+
+
 
 #Testando si tienen todas la columna completas
 all(colnames(datosITS1) %in% colnames(datosITS2)) 
@@ -31,53 +46,158 @@ comparacion_clases <- data.frame(
 )
 diferentes <- comparacion_clases %>%
   filter(clase_df1 != clase_df2)
-#columna clase_df1 clase_df2
-#Biome   Biome   numeric character
-#
-datosITS1 <- datosITS1 %>% mutate(Biome = as.character(Biome))
+# columna clase_df1 clase_df2
+# year_of_sampling year_of_sampling   numeric character
+# 
+# modificando la clase de its1
+datosITS1 <- datosITS1 %>% mutate(year_of_sampling = as.character(year_of_sampling))
 
 
 # Combinando ITS1 e ITS2
 # conserva todas las filas de ambos
 datosITS1_ITS2 <- bind_rows(datosITS1, datosITS2)
 nrow (datosITS1_ITS2 ) # 5195
+write_csv(datosITS1_ITS2, "datosITS1_ITS2.csv")  # también de `readr`
+
+
+nrow(datosITS1_ITS2)
+length(unique(datosITS1_ITS2$PermanentID))
+length(datosITS1_ITS2$PermanentID)
+
+conteo <- datosITS1_ITS2 %>%
+  group_by(dataset) %>%
+  summarise(PermanentID_unicos = n_distinct(PermanentID))
+#   dataset PermanentID_unicos
+#   <chr>                <int>
+# 1 its1                  2815
+# 2 its2                  1499
+
+duplicados <- datosITS1_ITS2 %>%
+  group_by(PermanentID) %>%
+  filter(n() > 1) %>%
+  arrange(PermanentID)
+
+
+conteo <- datosITS1_ITS2 %>%
+  count(PermanentID) %>%
+  filter(n > 1) %>%
+  arrange(desc(n))
+
+#Identificar los PermanentID que aparecen en ambos datasets
+#ninguno ID se repite entre datasets!
+ids_ambos <- datosITS1_ITS2 %>%
+  group_by(PermanentID) %>%
+  summarise(n_datasets = n_distinct(dataset)) %>%
+  filter(n_datasets > 1)
+
+
 
 
 ### De aqui en adelante puedo trabajar con solo una parte de los datos
 datos_filtrados <- datosITS1_ITS2 %>%
   select(1:19)
 
+sites <-datos_filtrados 
 
-
-
-colnames (datos)
+colnames (sites)
 #install.packages(readr)
 library(readr)
 library(geosphere)
 
-# Read the file with coordinates for ITS1
-sites <- read_csv("Data/WP2-coords_ITS1.csv")
-nrow (sites)
+sites_ITS1 <- datosITS1_ITS2 %>%
+  filter(dataset == "its1") %>%
+  select(PermanentID, latitude, longitude)
 
-head (WP2_coords_ITS1)
+sites_ITS2 <- datosITS1_ITS2 %>%
+  filter(dataset == "its2") %>%
+  select(PermanentID, latitude, longitude)
 
-# Select only the coordinates (longitude and latitude)
-coords <- sites[, c("Longitude", "Latitude")]
 
-# Compute distance matrix (in meters) using Haversine formula
-dist_matrix <- distm(coords, fun = distHaversine)
+library(geosphere)
 
-# Perform hierarchical clustering based on geographic distance
-clustering <- hclust(as.dist(dist_matrix), method = "complete")
+# ITS1
+coords1 <- sites_ITS1[, c("longitude", "latitude")]# Select only the coordinates (longitude and latitude)
+dist_matrix1 <- distm(coords1, fun = distHaversine)# Compute distance matrix (in meters) using Haversine formula
+clustering1 <- hclust(as.dist(dist_matrix1), method = "complete")# Perform hierarchical clustering based on geographic distance
+groups1 <- cutree(clustering1, h = 100) # Cut the dendrogram into clusters: group sites that are within 100 meters #cutree(..., h = 100) creates clusters where each site is within 100 meters of others in its group. You can adjust the h parameter to control the radius of clustering in meters.
 
-# Cut the dendrogram into clusters: group sites that are within 100 meters
-groups <- cutree(clustering, h = 100) #cutree(..., h = 100) creates clusters where each site is within 100 meters of others in its group. You can adjust the h parameter to control the radius of clustering in meters.
+sites_ITS1$grupo <- groups1
 
-# Add cluster assignments as a new column in the data frame
-sites$groups <- groups
+# ITS2
+coords2 <- sites_ITS2[, c("longitude", "latitude")]# Select only the coordinates (longitude and latitude)
+dist_matrix2 <- distm(coords2, fun = distHaversine)# Compute distance matrix (in meters) using Haversine formula
+clustering2 <- hclust(as.dist(dist_matrix2), method = "complete")# Perform hierarchical clustering based on geographic distance
+groups2 <- cutree(clustering2, h = 100) # Cut the dendrogram into clusters: group sites that are within 100 meters #cutree(..., h = 100) creates clusters where each site is within 100 meters of others in its group. You can adjust the h parameter to control the radius of clustering in meters.
+
+sites_ITS2$grupo <- groups2
+
+
+
+
+
+library(geosphere)
+
+# Coordenadas
+coords1 <- sites_ITS1[, c("longitude", "latitude")]
+
+# Matriz de distancias
+dist_matrix1 <- distm(coords1, fun = distHaversine)
+dist_values1 <- dist_matrix1[lower.tri(dist_matrix1)]
+
+# Histograma completo
+hist(dist_values1,
+     breaks = 100,
+     main = "ITS1 - Todas las distancias entre sitios",
+     xlab = "Distancia (m)",
+     col = "lightblue", border = "white")
+abline(v = 100, col = "red", lwd = 2, lty = 2)
+
+# Histograma solo < 300 m
+dist_under_1k_1 <- dist_values1[dist_values1 < 300]
+hist(dist_under_1k_1,
+     breaks = 100,
+     main = "ITS1 - Distancias < 1 km",
+     xlab = "Distancia (m)",
+     col = "lightblue", border = "white")
+abline(v = 100, col = "red", lwd = 2, lty = 2)
+
+# Tabla de frecuencia
+distance_group1 <- ifelse(dist_values1 <= 100, "≤ 100 m", "> 100 m")
+table(distance_group1)
+________________
+
+
+coords2 <- sites_ITS2[, c("longitude", "latitude")]
+dist_matrix2 <- distm(coords2, fun = distHaversine)
+dist_values2 <- dist_matrix2[lower.tri(dist_matrix2)]
+
+# Histograma completo
+hist(dist_values2,
+     breaks = 100,
+     main = "ITS2 - Todas las distancias entre sitios",
+     xlab = "Distancia (m)",
+     col = "lightblue", border = "white")
+abline(v = 100, col = "red", lwd = 2, lty = 2)
+
+# Histograma solo < 1 km
+dist_under_1k_2 <- dist_values2[dist_values2 < 300]
+hist(dist_under_1k_2,
+     breaks = 100,
+     main = "ITS2 - Distancias < 1 km",
+     xlab = "Distancia (m)",
+     col = "lightblue", border = "white")
+abline(v = 100, col = "red", lwd = 2, lty = 2)
+
+# Tabla de frecuencia
+distance_group2 <- ifelse(dist_values2 <= 100, "≤ 100 m", "> 100 m")
+table(distance_group2)
+
+
+_______________
+
 
 # Check the first few rows to confirm everything worked
-head(sites)
+head(sites_ITS2)
 
 
 # Compute distance matrix (in meters)

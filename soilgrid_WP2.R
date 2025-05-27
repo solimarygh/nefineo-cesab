@@ -2,7 +2,7 @@
 # Created by Micaela Santos
 # Date: 05/03/2024
 
-# Description:
+# Description_:
 # It contains an automatic way to download soil maps from SoilGrids.org and...
 # to extract soil property values using geographical coordinates from ITS2 dataset.
 # Each map is a raster image which describes an individual soil property.

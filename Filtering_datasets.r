@@ -36,3 +36,5 @@ v.keep.its2= ifelse(is.na(v.keep.its2), "no", "yes") #reemplace Na by "no"
 #Add new vector to dataset ####
 new.its1= cbind(its1[,1:5], To_keep=v.keep.its1, its1[,6:171])
 new.its2= cbind(its2[,1:5], To_keep=v.keep.its2, its2[,6:171])
+
+new.its1

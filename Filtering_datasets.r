@@ -80,4 +80,10 @@ new.ID.its2= paste0("NEF_its2_",new.its2$grouped_samples)
 new.its1= cbind(new.ID= new.ID.its1, new.its1[,1:173])
 new.its2= cbind(new.ID= new.ID.its2, new.its2[,1:173])
 
-#To filter final dataset keep samples by articles and grouped samples 
+# Export datasets as .csv ####
+write.csv(new.its1, file="new.its1.csv")
+write.csv(new.its2, file="new.its2.csv")
+
+#ATENTION
+#To filter final datasets keep samples by articles and consider grouped samples 
+

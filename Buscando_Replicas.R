@@ -8,104 +8,39 @@
 ### revisar metodo de vizinhanza para agrupar 100m to 90m
 ### ver s'i entendemos el plan de muestreo de los articulos que terminan con pseudo replicas
 ### verificar overlap -its1 y 2
-###
-###
+
+
+##CARGANDO LIBRERIAS NECESARIAS
 #install.packages(readr)
 library (readr)
 library (dplyr)
 library (readr)
 library (geosphere)
 
-# 1. Leer el archivo con encabezado como normalmente
-# #Base de datos ITS1
-datosITS1 <- read_tsv("Data/globfungi_metadata_filtered_complemented_its1_soil.tsv")
-nrow(datosITS1) #2815
 
-#el nombre de las columnas esta corrida. Para arregalar esso:
-nombres_actuales <- names(datosITS1)
-datosITS1 <- datosITS1 %>% select(-dataset)
-names(datosITS1) <- nombres_actuales
-glimpse(datosITS1)
-length (unique(datosITS1$PermanentID)) #2815 No hay IDs repetidas
-
-
-# #Base de datos ITS2
-datosITS2 <- read_tsv("Data/globfungi_metadata_filtered_complemented_its2_soil.tsv")
-nrow(datosITS2) #2380
-
-#el nombre de las columnas esta corrida. Para arregalar esso:
-nombres_actuales <- names(datosITS2)
-datosITS2 <- datosITS2 %>% select(-dataset)
-names(datosITS2) <- nombres_actuales
-glimpse(datosITS2)
-length (unique(datosITS1$PermanentID)) #2815 # Si hay IDs repetidas
-
-
-#Testando si tienen todas la columna completas
-all(colnames(datosITS1) %in% colnames(datosITS2)) 
-
-clases_df1 <- sapply(datosITS1, class)
-clases_df2 <- sapply(datosITS2, class)
-comparacion_clases <- data.frame(
-  columna = union(names(clases_df1), names(clases_df2)),
-  clase_df1 = clases_df1[match(union(names(clases_df1), names(clases_df2)), names(clases_df1))],
-  clase_df2 = clases_df2[match(union(names(clases_df1), names(clases_df2)), names(clases_df2))]
-)
-comparacion_clases %>%
-  filter(clase_df1 != clase_df2)
-# columna clase_df1 clase_df2
-# year_of_sampling year_of_sampling   numeric character
-# 
-# modificando la clase de its1
-datosITS1 <- datosITS1 %>% mutate(year_of_sampling = as.character(year_of_sampling))
-
-
-# Combinando ITS1 e ITS2
-# conserva todas las filas de ambos
-datosITS1_ITS2 <- bind_rows(datosITS1, datosITS2)
-nrow (datosITS1_ITS2 ) # 5195 (suma 2380+2815)
-#write_csv(datosITS1_ITS2, "Data/datosITS1_ITS2.csv")  # también de `readr`
-
-
-
-length(unique(datosITS1_ITS2$PermanentID)) #4314 (suma 2815+1499)
-
-
-#Cuantos PermanentID por cada dataset?
-datosITS1_ITS2 %>%
-  group_by(dataset) %>%
-  summarise(PermanentID_unicos = n_distinct(PermanentID))
-#   dataset PermanentID_unicos
-#   <chr>                <int>
-# 1 its1                  2815
-# 2 its2                  1499
-
-
-#Identificar los PermanentID que aparecen en ambos datasets
-#ninguno ID se repite entre datasets!
-ids_ambos <- datosITS1_ITS2 %>%
-  group_by(PermanentID) %>%
-  summarise(n_datasets = n_distinct(dataset)) %>%
-  filter(n_datasets > 1)
-
-
-
-
-### De aqui en adelante puedo trabajar con solo una parte de los datos
-
-sites_ITS1 <- datosITS1_ITS2 %>%
-  filter(dataset == "its1") %>%
+#final dataset its1 
+datosITS1= read.table("Data/globfungi_metadata_filtered_complemented_its1_soil.tsv", 
+                 sep ="\t",)
+sites_ITS1 <- datosITS1 %>%
   select(PermanentID, latitude, longitude)
+length(unique (sites_ITS1$PermanentID))
 
-sites_ITS2 <- datosITS1_ITS2 %>%
-  filter(dataset == "its2") %>%
+
+
+#final dataset its2
+datosITS2= read.table("Data/globfungi_metadata_filtered_complemented_its2_soil.tsv", 
+                 sep ="\t",)
+sites_ITS2 <- datosITS2 %>%
   select(PermanentID, latitude, longitude)
+length(unique (sites_ITS2$PermanentID))
 
 
 ## The plan is to aggregate locations that have samples (pseudoreplicates) within 90 meters, 
 # considering the methodology used in field plots. Compute the distance matrix (in meters) using the Haversine formula. Then, to identify the best threshold for sample aggregation, we converted the full distance matrix to a vector (excluding redundant and diagonal elements). We did a Histogram for all and also a zoom of distances < 200 meters. We identify that 90-meter threshold is a good number (there is a evident gap). 
 
 #Then, we performed the hierarchical clustering based on geographic distance, we use the method "completes" which Only merges groups if all pairs within the group are within 90 meters of each other. This results in smaller and more compact clusters. There is no "chain" effect: if A is within 100 m of B, and B is within 100 m of C, A and C will not be in the same group unless A is also within 100 m of C. It is ideal because we want stricter and more homogeneous spatial clusters.
+
+
 
 # ITS1
 coords1 <- sites_ITS1[, c("longitude", "latitude")]# Select only the coordinates (longitude and latitude)

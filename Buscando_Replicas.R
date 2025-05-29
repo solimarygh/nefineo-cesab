@@ -103,24 +103,9 @@ sites_ITS2 <- datosITS1_ITS2 %>%
 
 
 ## The plan is to aggregate locations that have samples (pseudoreplicates) within 90 meters, 
-# considering the methodology used in field plots.
+# considering the methodology used in field plots. Compute the distance matrix (in meters) using the Haversine formula. Then, to identify the best threshold for sample aggregation, we converted the full distance matrix to a vector (excluding redundant and diagonal elements). We did a Histogram for all and also a zoom of distances < 200 meters. We identify that 90-meter threshold is a good number (there is a evident gap). 
 
-# Compute the distance matrix (in meters) using the Haversine formula
-
-# To identify the best threshold for sample aggregation
-
-# Convert the full distance matrix to a vector (excluding redundant and diagonal elements)
-
-# Full histogram
-
-# Histogram for distances < 200 meters
-
-# Filter for distances below 90 meters
-
-# Create logical groups based on the 90-meter threshold
-
-
-#Here, we performed the hierarchical clustering based on geographic distance, we use the method "completes" which Only merges groups if all pairs within the group are within 100 meters of each other. This results in smaller and more compact clusters. There is no "chain" effect: if A is within 100 m of B, and B is within 100 m of C, A and C will not be in the same group unless A is also within 100 m of C. It is Ideal when you want stricter and more homogeneous spatial clusters.
+#Then, we performed the hierarchical clustering based on geographic distance, we use the method "completes" which Only merges groups if all pairs within the group are within 90 meters of each other. This results in smaller and more compact clusters. There is no "chain" effect: if A is within 100 m of B, and B is within 100 m of C, A and C will not be in the same group unless A is also within 100 m of C. It is ideal because we want stricter and more homogeneous spatial clusters.
 
 # ITS1
 coords1 <- sites_ITS1[, c("longitude", "latitude")]# Select only the coordinates (longitude and latitude)
@@ -176,7 +161,7 @@ table(sites_ITS1$grupo_espacial)
 
 sites_ITS1 <- sites_ITS1 %>%
   group_by(grupo_espacial) %>%
-  mutate(To_keep = ifelse(n() == 1, "yes", "no")) %>% #solamente una muestra a cada 90m
+  mutate(Pseudoreplicas_site = ifelse(n() == 1, "no", "yes")) %>% #solamente una muestra a cada 90m
   ungroup()
 
 
@@ -184,11 +169,13 @@ sites_ITS1 <- sites_ITS1 %>%
 head(sites_ITS1)
 
 nearby_sites <- sites_ITS1%>% 
-  filter(To_keep == "yes")
+  filter(Pseudoreplicas_site == "no")
 
-nrow(nearby_sites) #solo 37!!
+nrow(nearby_sites) #solo 37!!sin pseudoreplicas
 
-write.csv(sites, "Data/sites_ITS1.csv", row.names = FALSE)
+max( sites_ITS1$grupo_espacial) #682 grupos espaciais! !! 
+
+write.csv(sites_ITS1, "Data/sites_ITS1.csv", row.names = FALSE)
 
 ##### duda!! no vamos a mantener un representante de los sitios que tienen varias muestras
 ##### # A. For groups with more than one sample, keep only one (the first one)
@@ -200,12 +187,12 @@ representantes_de_grupos1 <- sites_ITS1 %>%
 
 # B. Add the unique sites that were already alone (To_keep == "yes")
 sitios_unicos1 <- sites_ITS1 %>%
-  filter(To_keep == "yes")
+  filter(Pseudoreplicas_site == "no")
 
 # C. Combine both: unique sites + representatives from groups
 final_sites_ITS1 <- bind_rows(sitios_unicos1, representantes_de_grupos1)
 
-nrow(final_sites_ITS1) # 682 sitios totais!
+nrow(final_sites_ITS1) # 682 sitios totais! ok, é o mesmo numero que grupos creado por cluster de 90m
 
 # D. Optional: save the result
 write.csv(final_sites_ITS1, "Data/sites_ITS1_unicos_o_representantes.csv", row.names = FALSE)
@@ -270,19 +257,19 @@ table(sites_ITS2$grupo_espacial)
 
 sites_ITS2 <- sites_ITS2 %>%
   group_by(grupo_espacial) %>%
-  mutate(To_keep = ifelse(n() == 1, "yes", "no")) %>% #solamente una muestra a cada 90m
+  mutate(Pseudoreplicas_site = ifelse(n() == 1, "no", "yes")) %>% #solamente una muestra a cada 90m
   ungroup()
-
 
 # View result
 head(sites_ITS2)
 
 nearby_sites2 <- sites_ITS2%>% 
-  filter(To_keep == "yes")
+  filter(Pseudoreplicas_site == "no")
 
-nrow(nearby_sites2) #solo 227!!
+nrow(nearby_sites2) #solo 227!! sin pseudoreplicas
+max( sites_ITS2$grupo_espacial) #367 grupos espaciais! !! 
 
-write.csv(sites, "Data/sites_ITS2.csv", row.names = FALSE)
+write.csv(sites_ITS2, "Data/sites_ITS2.csv", row.names = FALSE)
 
 
 ##### duda!! no vamos a mantener un representante de los sitios que tienen varias muestras
@@ -295,7 +282,7 @@ representantes_de_grupos2 <- sites_ITS2 %>%
 
 # B. Add the unique sites that were already alone (To_keep == "yes")
 sitios_unicos2 <- sites_ITS2 %>%
-  filter(To_keep == "yes")
+  filter(Pseudoreplicas_site == "no")
 
 # C. Combine both: unique sites + representatives from groups
 final_sites_ITS2 <- bind_rows(sitios_unicos2, representantes_de_grupos2)

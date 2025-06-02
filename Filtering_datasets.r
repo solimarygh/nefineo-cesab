@@ -1,13 +1,14 @@
 #Title: Filtering_datasets
 #Created 29/5/2025 
-#Authors Solimary García & Micaela Santos
-#Description: The aim of this code is to get the final globalfungi dataset for 
-#its1 and its2. First we create a new column to keep samples (rows) according to
-#paper id (samplings in natural habitats, no plantations).
-#Second we create a column to grouped samples by a threshold of 90m of proximity.
-#Third we create a new permanent ID to each sample according to the number of group and
+#Authors: Solimary García & Micaela Santos
+#Project: NEFINEO_MS.Rproj
+#Description: The aim of this code is to get the final globalfungi dataset for its1 and its2.
+#1. Create a column to keep samples according to paper id (no plantations).
+#2. Create a column to group samples by a threshold of 90m of proximity.
+#3. Create a new permanent ID to each sample according to the number of group and ...
 #the year of paper to avoid getting grouped samples of different samplings.
-#Forth we export dataset as .csv files to NEFINEO_MS.Rproj
+#4. Export completed datasets as .csv files 
+#5. Export short datasets indicating new ID and permanent ID of each sample
 
 #Set working directory from NEFINEO_MS.Rproj####
 #github directory
@@ -95,4 +96,10 @@ n.studies.its2= studies.its2[studies.its2 > 1]
 #write.csv(new.its1, file="Data/new.its1.csv")
 #write.csv(new.its2, file="Data/new.its2.csv")
 
+#Export datasets as .csv ####
+#Filter useful columns
+to_use_its1= subset(new.its1, paper_to_keep=="yes", select=c(new.ID,PermanentID))
+to_use_its2= subset(new.its2, paper_to_keep=="yes", select=c(new.ID,PermanentID))
 
+#write.csv(to_use_its1, file="Data/short.new.its1.csv")
+#write.csv(to_use_its2, file="Data/short.new.its2.csv")

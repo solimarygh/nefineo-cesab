@@ -9,6 +9,7 @@
 #the year of paper to avoid getting grouped samples of different samplings.
 #4. Export completed datasets as .csv files 
 #5. Export short datasets indicating new ID and permanent ID of each sample
+#6. Create new ID for new datasets (no global fungi) and write individual .csv for each study   
 
 #Set working directory from NEFINEO_MS.Rproj####
 #github directory
@@ -68,8 +69,8 @@ new.its1= cbind(new.its1[,1:3], grouped_samples=groups_its1, new.its1[,4:172])
 new.its2= cbind(new.its2[,1:3], grouped_samples=groups_its2, new.its2[,4:172])
 
 #Create new permanent ID for grouped samples ####
-new.ID.its1= paste0("NEF_its1_",new.its1$grouped_samples,"_",new.its1$year)
-new.ID.its2= paste0("NEF_its2_",new.its2$grouped_samples,"_",new.its2$year)
+new.ID.its1= paste0("NEF_GloFung-its1_",new.its1$grouped_samples,"_",new.its1$year)
+new.ID.its2= paste0("NEF_GloFung-its2_",new.its2$grouped_samples,"_",new.its2$year)
 
 #Add column for new ID
 new.its1= cbind(new.ID= new.ID.its1, new.its1[,1:173])
@@ -77,12 +78,14 @@ new.its2= cbind(new.ID= new.ID.its2, new.its2[,1:173])
 
 #Checking final datasets ####
 length(which(new.its1[,"paper_to_keep"]=="yes",TRUE)) #1829 non-grouped samples
-final.its1= subset(new.its1, paper_to_keep=="yes") #filtering by papers to keep
-length(unique(final.its1$grouped_samples)) #563 grouped samples 
+final.its1= subset(new.its1, paper_to_keep=="yes" & 
+    morrone_biogeoregions_Region=="Neotropical") #filtering by papers to keep
+length(unique(final.its1$grouped_samples)) #466 grouped samples 
 
 length(which(new.its2[,"paper_to_keep"]=="yes",TRUE))#1435 non-grouped samples
-final.its2= subset(new.its2, paper_to_keep=="yes") #filtering by papers to keep 
-length(unique(final.its2$grouped_samples)) #729 grouped samples 
+final.its2= subset(new.its2, paper_to_keep=="yes" & 
+                     morrone_biogeoregions_Region=="Neotropical") #filtering by papers to keep 
+length(unique(final.its2$grouped_samples)) #608 grouped samples 
 
 #check grouped samples from more than 1 study 
 #its1
@@ -98,8 +101,53 @@ n.studies.its2= studies.its2[studies.its2 > 1]
 
 #Export datasets as .csv ####
 #Filter useful columns
-to_use_its1= subset(new.its1, paper_to_keep=="yes", select=c(new.ID,PermanentID))
-to_use_its2= subset(new.its2, paper_to_keep=="yes", select=c(new.ID,PermanentID))
+to_use_its1= subset(new.its1, c(paper_to_keep=="yes" & 
+    morrone_biogeoregions_Region=="Neotropical"),select=c(new.ID,PermanentID))
+to_use_its2= subset(new.its2, c(paper_to_keep=="yes" & 
+    morrone_biogeoregions_Region=="Neotropical"), select=c(new.ID,PermanentID))
 
 #write.csv(to_use_its1, file="Data/short.new.its1.csv")
 #write.csv(to_use_its2, file="Data/short.new.its2.csv")
+
+#Add new datasets #####
+diam= read.csv("Data/French_Guiana_soil_eDNA_metabarcoding_metadata_20.09.2024_MR.csv", sep=";")
+dryf= read.csv("Data/metabarlist_fung02_for_nefineo_samples_MR.csv", sep=";")
+spun= read.csv("Data/Muestras Proyecto SPUN.xlsx - Darwin Core data.csv")
+mymo= read.csv("Data/Mymo_ITS_tax_forNEFINEO_seq.xlsx - Mymo_ITS_tax_forNEFINEO.csv")
+long= read.csv("Data/LONGTIME_fung02_samples.csv", sep=";")
+
+new.ID.diam= paste0("NEF_diam_",diam$plot_id,"_2025")
+new.diam= cbind(new.ID=new.ID.diam, diam)
+#FALTA FILTRAR POR PLANTACIONES
+#write.csv(new.diam, file="Data/new.diam.csv")
+
+new.ID.dryf= paste0("NEF_dryf_",dryf$plot,"_2025")
+new.dryf= cbind(new.ID=new.ID.dryf, dryf)
+#write.csv(new.dryf, file="Data/new.dryf.csv")
+
+new.ID.spun= paste0("NEF_spun_",spun$recordNumber,"_2025")
+new.spun= cbind(new.ID=new.ID.spun, spun)
+#write.csv(new.spun, file="Data/new.spun.csv")
+
+library(stringr)
+new.ID.mymo= paste0("NEF_mymo_",str_extract(mymo$id, "(?<=-).*"),"_2025")
+new.mymo= cbind(new.ID=new.ID.mymo, mymo)
+#write.csv(new.mymo, file="Data/new.mymo.csv")
+
+new.ID.long= paste0("NEF_long_",str_extract(long$SampleID, "(?<=_).*"),"_2025")
+new.long= cbind(new.ID=new.ID.long, long)
+#write.csv(new.long, file="Data/new.long.csv")
+
+a= subset(new.diam,select=c(new.ID, plot_id))
+b= subset(new.dryf,select=c(new.ID, plot))
+c= subset(new.spun,select=c(new.ID, recordNumber))
+d= subset(new.mymo,select=c(new.ID, id))
+e= subset(new.long,select=c(new.ID, SampleID))
+colnames(a)[2]="PermanentID"
+colnames(b)[2]="PermanentID"
+colnames(c)[2]="PermanentID"
+colnames(d)[2]="PermanentID"
+colnames(e)[2]="PermanentID"
+
+short.new.data= rbind(a,b,c,d,e)
+#write.csv(short.new.data, file="Data/short.new.data.csv")

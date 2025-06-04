@@ -1,0 +1,97 @@
+---
+title: "Filtering_datasets"
+author: "Solimary García & Micaela Santos"
+date: "2025-06-02"
+output:
+  pdf_document: default
+  html_document: default
+---
+
+## Description
+
+The aim of this code is to get the final GlobalFungi dataset for ITS1 and ITS2.  
+1. First, we create a new column to keep samples (rows) according to paper ID (natural habitats, no plantations).  
+2. Second, we group samples by a threshold of 90m proximity.  
+3. Third, we create a new permanent ID for each sample based on group and year.  
+4. Finally, we export the dataset as .csv files to the NEFINEO_MS.Rproj folder.
+
+---
+
+## Code
+
+```{r}
+# Set working directory from NEFINEO_MS.Rproj
+list.files() # check files in folder
+# Datasets in folder: Data
+
+# Open datasets
+its1 = read.table("Data/globfungi_metadata_filtered_complemented_its1_soil.tsv", sep ="	")
+length(unique(its1$PermanentID)) # check ID by sample #2815 samples
+
+its1.plant = read.csv("Data/article_list_noplantation.its1.csv")
+
+its2 = read.table("Data/globfungi_metadata_filtered_complemented_its2_soil.tsv", sep ="	")
+length(unique(its2$PermanentID)) # check ID by sample #2380 samples
+
+its2.plant = read.csv("Data/article_list_noplantation.its2.csv")
+
+# Create new vector of articles to keep in datasets its1/its2
+keep.its1 = subset(its1.plant, To_keep=="yes", select= title)
+nrow(keep.its1) # 20 articles to keep
+v.keep.its1 = match(its1$paper_id, keep.its1$title)
+v.keep.its1 = ifelse(is.na(v.keep.its1), "no", "yes")
+
+keep.its2 = subset(its2.plant, To_keep=="yes", select= title)
+nrow(keep.its2) # 28 articles to keep
+v.keep.its2 = match(its2$paper_id, keep.its2$title)
+v.keep.its2 = ifelse(is.na(v.keep.its2), "no", "yes")
+
+# Add new vector of articles to keep to dataset
+new.its1 = cbind(its1[,1:5], paper_to_keep = v.keep.its1, its1[,6:171])
+new.its2 = cbind(its2[,1:5], paper_to_keep = v.keep.its2, its2[,6:171])
+
+# Create new vector of grouped samples by a threshold of 90m of proximity
+library(dplyr)
+library(geosphere)
+
+dist_matrix_its1 <- distm(new.its1[,c("longitude","latitude")], fun = distHaversine)
+dist_matrix_its2 <- distm(new.its2[,c("longitude","latitude")], fun = distHaversine)
+
+cluster_its1 <- hclust(as.dist(dist_matrix_its1), method = "complete")
+cluster_its2 <- hclust(as.dist(dist_matrix_its2), method = "complete")
+
+groups_its1 <- cutree(cluster_its1, h = 90)
+groups_its2 <- cutree(cluster_its2, h = 90)
+
+# Add new vector of grouped samples to datasets
+new.its1 = cbind(new.its1[,1:3], grouped_samples = groups_its1, new.its1[,4:172])
+new.its2 = cbind(new.its2[,1:3], grouped_samples = groups_its2, new.its2[,4:172])
+
+# Create new permanent ID for grouped samples
+new.ID.its1 = paste0("NEF_its1_", new.its1$grouped_samples, "_", new.its1$year)
+new.ID.its2 = paste0("NEF_its2_", new.its2$grouped_samples, "_", new.its2$year)
+
+# Add column for new ID
+new.its1 = cbind(new.ID = new.ID.its1, new.its1[,1:173])
+new.its2 = cbind(new.ID = new.ID.its2, new.its2[,1:173])
+
+# Checking final datasets
+length(which(new.its1[,"paper_to_keep"]=="yes", TRUE)) # 1829 non-grouped samples
+final.its1 = subset(new.its1, paper_to_keep == "yes")
+length(unique(final.its1$grouped_samples)) # 563 grouped samples
+
+length(which(new.its2[,"paper_to_keep"]=="yes", TRUE)) # 1435 non-grouped samples
+final.its2 = subset(new.its2, paper_to_keep == "yes")
+length(unique(final.its2$grouped_samples)) # 729 grouped samples
+
+# Check grouped samples from more than one study
+studies.its1 = tapply(final.its1$paper_id, final.its1$new.ID, function(x) length(unique(x)))
+n.studies.its1 = studies.its1[studies.its1 > 1]
+
+studies.its2 = tapply(final.its2$paper_id, final.its2$new.ID, function(x) length(unique(x)))
+n.studies.its2 = studies.its2[studies.its2 > 1]
+
+# Export datasets as .csv
+# write.csv(new.its1, file = "Data/new.its1.csv")
+# write.csv(new.its2, file = "Data/new.its2.csv")
+```

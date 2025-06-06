@@ -18,9 +18,12 @@ xy_long= data.frame(new.ID=new.long$new.ID, lapply(xy_long, function(x) round(x,
 xy_spun= data.frame(Latitude= new.spun$decimalLatitude, Longitude=new.spun$decimalLongitude) #decimals
 xy_spun= data.frame(new.ID=new.spun$new.ID, lapply(xy_spun, function(x) as.numeric(gsub(",", ".", x)))) #replace "," by "." 
 xy_dryf= data.frame(new.ID=new.dryf$new.ID, Latitude= new.dryf$y, Longitude=new.dryf$x)
-#xy_diam= data.frame(new.ID=new.dryf$new.ID, Latitude= new.diam$latitude, Longitude=new.diam$longitude)
+xy_diam= data.frame(Latitude= new.diam$latitude, Longitude=new.diam$longitude)
+xy_diam= data.frame(new.ID=new.diam$new.ID, lapply(xy_diam, function(x) round(x,3)))# round 3 digits
+xy_mymo= data.frame(Latitude= new.mymo$Latitude, Longitude=new.mymo$Longitude)
+xy_mymo= data.frame(new.ID=new.mymo$new.ID, lapply(xy_mymo, function(x) round(x,3)))# round 3 digits
 
-sites= rbind(xy_long, xy_spun, xy_dryf) #all coords
+sites= rbind(xy_long, xy_spun, xy_dryf, xy_diam, xy_mymo) #all coords
 
 # 2. Open and install packages ####   
 # Packages we will need

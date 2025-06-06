@@ -110,17 +110,20 @@ to_use_its2= subset(new.its2, c(paper_to_keep=="yes" &
 #write.csv(to_use_its2, file="Data/short.new.its2.csv")
 
 #Add new datasets #####
-diam= read.csv("Data/French_Guiana_soil_eDNA_metabarcoding_metadata_20.09.2024_MR.csv", sep=";")
+diam= read.csv("Data/French_Guiana_soil_eDNA_metabarcoding_metadata_20.09.2024.csv", sep=",")
+diam.keep= read.csv("Data/French_Guiana_soil_eDNA_metabarcoding_metadata_20.09.2024_MR.csv", sep=";")
 dryf= read.csv("Data/metabarlist_fung02_for_nefineo_samples_MR.csv", sep=";")
 spun= read.csv("Data/Muestras Proyecto SPUN.xlsx - Darwin Core data.csv")
-mymo= read.csv("Data/Mymo_ITS_tax_forNEFINEO_seq.xlsx - Mymo_ITS_tax_forNEFINEO.csv")
+mymo= read.csv("Data/Mymo_ITS_tax_forNEFINEO_seq.csv", sep=",")
 long= read.csv("Data/LONGTIME_fung02_samples.csv", sep=";")
 
+diam= cbind(diam, tokeep_NEF=diam.keep$tokeep_NEF)
+diam= subset(diam, diam$tokeep_NEF=="yes")
 new.ID.diam= paste0("NEF_diam_",diam$plot_id,"_2025")
 new.diam= cbind(new.ID=new.ID.diam, diam)
-#FALTA FILTRAR POR PLANTACIONES
 #write.csv(new.diam, file="Data/new.diam.csv")
 
+dryf= subset(dryf, dryf$tokeep_NEF=="yes")
 new.ID.dryf= paste0("NEF_dryf_",dryf$plot,"_2025")
 new.dryf= cbind(new.ID=new.ID.dryf, dryf)
 #write.csv(new.dryf, file="Data/new.dryf.csv")
@@ -129,11 +132,13 @@ new.ID.spun= paste0("NEF_spun_",spun$recordNumber,"_2025")
 new.spun= cbind(new.ID=new.ID.spun, spun)
 #write.csv(new.spun, file="Data/new.spun.csv")
 
-library(stringr)
-new.ID.mymo= paste0("NEF_mymo_",str_extract(mymo$id, "(?<=-).*"),"_2025")
+#library(stringr)
+#new.ID.mymo= paste0("NEF_mymo_",str_extract(mymo$id, "(?<=-).*"),"_2025")
+new.ID.mymo= paste0("NEF_mymo_",mymo$SampleID,"_2025")
 new.mymo= cbind(new.ID=new.ID.mymo, mymo)
 #write.csv(new.mymo, file="Data/new.mymo.csv")
 
+library(stringr)
 new.ID.long= paste0("NEF_long_",str_extract(long$SampleID, "(?<=_).*"),"_2025")
 new.long= cbind(new.ID=new.ID.long, long)
 #write.csv(new.long, file="Data/new.long.csv")
@@ -141,7 +146,7 @@ new.long= cbind(new.ID=new.ID.long, long)
 a= subset(new.diam,select=c(new.ID, plot_id))
 b= subset(new.dryf,select=c(new.ID, plot))
 c= subset(new.spun,select=c(new.ID, recordNumber))
-d= subset(new.mymo,select=c(new.ID, id))
+d= subset(new.mymo,select=c(new.ID, SampleID))
 e= subset(new.long,select=c(new.ID, SampleID))
 colnames(a)[2]="PermanentID"
 colnames(b)[2]="PermanentID"
@@ -151,3 +156,4 @@ colnames(e)[2]="PermanentID"
 
 short.new.data= rbind(a,b,c,d,e)
 #write.csv(short.new.data, file="Data/short.new.data.csv")
+

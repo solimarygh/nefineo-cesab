@@ -1,0 +1,47 @@
+SampleID,Country,Site_name,Province,SampleID,Latitude ,Longitude ,Grid_Size,Soil_Depth,Vegetation,Land_use,Ecosystem,Elevation_masl,Date_collected,Sequencing_platform,Sequencing_facility,PrimerF,PrimerR,Expedition leader,Collaborators
+MYMO1,Argentina,Sorocayense,San Juan,MYMOM1,-31.558973,-69.438429,30*30,10,cf,Non Agricultural,Monte,1 560,15/12/2023,Genomique_Quebec,Miseq,,,MROY,David Jose de la Cruz Lopez
+MYMO10,Argentina,Canota,Mendoza,MYMOM10,-32.563870,-68.882036,30*30,10,cf,Non Agricultural,Monte,952,21/12/2023,Genomique_Quebec,Miseq,,,MROY,David Jose de la Cruz Lopez
+MYMO11,Argentina,Canota,Mendoza,MYMOM11,-32.557638,-68.903937,30*30,10,cf,Non Agricultural,Monte,1 004,21/12/2023,Genomique_Quebec,Miseq,,,MROY,David Jose de la Cruz Lopez
+MYMO12,Argentina,Canota,Mendoza,MYMOM12,-32.547058,-68.927196,30*30,10,cf,Non Agricultural,Monte,1 125,21/12/2023,Genomique_Quebec,Miseq,,,MROY,David Jose de la Cruz Lopez
+MYMO13,Argentina,Piedras Viejas,Mendoza,MYMOM13,-32.904521,-69.010072,30*30,10,cf,Non Agricultural,Monte,1 542,21/12/2023,Genomique_Quebec,Miseq,,,MROY,David Jose de la Cruz Lopez
+MYMO15,Argentina,Piedras Viejas,Mendoza,MYMOM15,-32.905424,-68.997880,30*30,10,cf,Non Agricultural,Monte,1 454,21/12/2023,Genomique_Quebec,Miseq,,,MROY,David Jose de la Cruz Lopez
+MYMO16,Argentina,Carrera,Mendoza,MYMOM16,-33.162976,-69.257155,30*30,10,cf,Non Agricultural,Monte,1 926,3/1/2024,Genomique_Quebec,Miseq,,,MROY,David Jose de la Cruz Lopez
+MYMO17,Argentina,Gualtallary,Mendoza,MYMOM17,-33.391481,-69.244708,30*30,10,cf,Non Agricultural,Monte,1 322,4/1/2024,Genomique_Quebec,Miseq,,,MROY,David Jose de la Cruz Lopez
+MYMO18,Argentina,Carrizal,Mendoza,MYMOM18,-33.131668,-68.684740,30*30,10,cf,Non Agricultural,Monte,717,4/1/2024,Genomique_Quebec,Miseq,,,MROY,David Jose de la Cruz Lopez
+MYMO19,Argentina,Lulunta,Mendoza,MYMOM19,-33.06844,-68.83204,30*30,10,cf,Non Agricultural,Monte,954,6/1/2024,Genomique_Quebec,Miseq,,,MROY,David Jose de la Cruz Lopez
+MYMO2,Argentina,Hilario,San Juan,MYMOM2,-31.486755,-69.401161,30*30,10,cf,Non Agricultural,Monte,1 500,14/12/2023,Genomique_Quebec,Miseq,,,MROY,David Jose de la Cruz Lopez
+MYMO20,Argentina,Naoki,Mendoza,MYMOM20,-33.188408,-68.879366,30*30,10,cf,Non Agricultural,Monte,934,16/1/2024,Genomique_Quebec,Miseq,,,MROY,David Jose de la Cruz Lopez
+MYMO21,Argentina,Estocada,Mendoza,MYMOM21,-33.428744,-69.206689,30*30,10,cf,Non Agricultural,Monte,1 162,16/1/2024,Genomique_Quebec,Miseq,,,MROY,David Jose de la Cruz Lopez
+MYMO22,Argentina,Tupungato,Mendoza,MYMOM22,-33.395,-69.18056,30*30,10,cf,Non Agricultural,Monte,1109,16/1/2024,Genomique_Quebec,Miseq,,,MROY,David Jose de la Cruz Lopez
+MYMO23,Argentina,Agrelo - Caicayen,Mendoza,MYMOM23,-33.394281,-69.206517,30*30,10,cf,Non Agricultural,Monte,1197,10/1/2024,Genomique_Quebec,Miseq,,,MROY,David Jose de la Cruz Lopez
+MYMO24,Argentina,Chacayes - Lican,Mendoza,MYMOM24,-33.374186,-69.245619,30*30,10,cf,Non Agricultural,Monte,1369,10/1/2024,Genomique_Quebec,Miseq,,,MROY,David Jose de la Cruz Lopez
+MYMO25,Argentina,San Carlos - Yaima,Mendoza,MYMOM25,-33.782097,-69.106756,30*30,10,cf,Non Agricultural,Monte,1019,10/1/2024,Genomique_Quebec,Miseq,,,MROY,David Jose de la Cruz Lopez
+MYMO26,Argentina,Chacayes,Mendoza,MYMOM26,-33.59569,-69.28524,30*30,10,cf,Non Agricultural,Monte,1270,23/2/2024,Genomique_Quebec,Miseq,,,MROY,David Jose de la Cruz Lopez
+MYMO27,Argentina,Chacayes,Mendoza,MYMOM27,-33.60079,-69.22975,30*30,10,cf,Non Agricultural,Monte,1093,23/2/2024,Genomique_Quebec,Miseq,,,MROY,David Jose de la Cruz Lopez
+MYMO28,Argentina,Chacayes,Mendoza,MYMOM28,-33.61392,-69.27558,30*30,10,cf,Non Agricultural,Monte,1231,23/2/2024,Genomique_Quebec,Miseq,,,MROY,David Jose de la Cruz Lopez
+MYMO29,Argentina,Chacayes,Mendoza,MYMOM29,-33.60836,-69.21063,30*30,10,cf,Non Agricultural,Monte,1041,23/2/2024,Genomique_Quebec,Miseq,,,MROY,David Jose de la Cruz Lopez
+MYMO3,Argentina,Puchuzum,San Juan,MYMOM3,-31.164769,-69.453791,30*30,10,cf,Non Agricultural,Monte,1 430,14/12/2023,Genomique_Quebec,Miseq,,,MROY,David Jose de la Cruz Lopez
+MYMO30,Argentina,La Consulta,Mendoza,MYMOM30,-33.7829,-69.13115,30*30,10,cf,Non Agricultural,Monte,1050,23/2/2024,Genomique_Quebec,Miseq,,,MROY,David Jose de la Cruz Lopez
+MYMO31,Argentina,Telteca,Mendoza,MYMOM31,-32.45735,-67.8857,30*30,10,cf,Non Agricultural,Monte,544,1/3/2024,Genomique_Quebec,Miseq,,,MROY,David Jose de la Cruz Lopez
+MYMO32,Argentina,Telteca,Mendoza,MYMOM32,-32.41326,-67.94154,30*30,10,cf,Non Agricultural,Monte,546,1/3/2024,Genomique_Quebec,Miseq,,,MROY,David Jose de la Cruz Lopez
+MYMO33,Argentina,Telteca,Mendoza,MYMOM33,-32.36092,-67.8302,30*30,10,cf,Non Agricultural,Monte,531,1/3/2024,Genomique_Quebec,Miseq,,,MROY,David Jose de la Cruz Lopez
+MYMO34,Argentina,Telteca,Mendoza,MYMOM34,-32.41765,-67.94882,30*30,10,cf,Non Agricultural,Monte,548,1/3/2024,Genomique_Quebec,Miseq,,,MROY,David Jose de la Cruz Lopez
+MYMO4,Argentina,Villa Nueva,San Juan,MYMOM4,-31.040724,-69.495733,30*30,10,cf,Non Agricultural,Monte,1608,14/12/2023,Genomique_Quebec,Miseq,,,MROY,David Jose de la Cruz Lopez
+MYMO5,Argentina,el Carmen,San Juan,MYMOM5,-31.225405,-69.457306,30*30,10,cf,Non Agricultural,Monte,1379,14/12/2023,Genomique_Quebec,Miseq,,,MROY,David Jose de la Cruz Lopez
+MYMO6,Argentina,Barreal,San Juan,MYMOM6,-31.603769,-69.451959,30*30,10,cf,Non Agricultural,Monte,1621,14/12/2023,Genomique_Quebec,Miseq,,,MROY,David Jose de la Cruz Lopez
+MymoNS200,Argentina,Corral_Quemado,Catamarca,MymoNS200,-27.241289997473359,-66.910899979993701,30*30,10,cf,Non Agricultural,Monte,1828,,,,,,,
+MymoNS202,Argentina,Bodega_Amaicha,Tucuman,MymoNS202,-26.587086981162429,-65.890162037685513,30*30,10,cf,Non Agricultural,Monte,2105,,Genomique_Quebec,Miseq,,,MROY,David Jose de la Cruz Lopez
+MymoNS203,Argentina,Vertientes_Tintos,Tucuman,MymoNS203,-26.611980982124805,-65.891845040023327,30*30,10,cf,Non Agricultural,Monte,2096,,Genomique_Quebec,Miseq,,,MROY,David Jose de la Cruz Lopez
+MymoNS204,Argentina,Hualfin,Catamarca,MymoNS204,-27.227971601505768,-66.83508937578611,30*30,10,cf,Non Agricultural,Monte,1843,,,,,,,
+MymoNS205,Argentina,Sanogasta,La Rioja,MymoNS205,-29.318720977753401,-67.614428987726569,30*30,10,cf,Non Agricultural,Monte,1247,,,,,,,
+MymoNS206,Argentina,La puerta_Sanogasta,La Rioja,MymoNS206,-29.306006971746683,-67.588681038469076,30*30,10,cf,Non Agricultural,Monte,1216,,,,,,,
+MymoNS207,Argentina,la puerta_sur,La Rioja,MymoNS207,-29.527621977031231,-67.465781969949603,30*30,10,cf,Non Agricultural,Monte,813,,,,,,,
+MymoNS208,Argentina,ruta,La Rioja,MymoNS208,-29.390593031421304,-67.434427030384541,30*30,10,cf,Non Agricultural,Monte,849,,,,,,,
+MymoNS209,Argentina,Rincon,La Rioja,MymoNS209,-29.196565970778465,-67.472234023734927,30*30,10,cf,Non Agricultural,Monte,969,,,,,,,
+MymoNS18,Argentina,Uco,Mendoza,MymoNS18,-33.82041,-69.20321,30*31,10,cf,Non Agricultural,Monte,,,,,,,,
+MymoNS22,Argentina,Uco,Mendoza,MymoNS22,-33.49175,-69.25853,30*32,10,cf,Non Agricultural,Monte,,,,,,,,
+MymoNS29,Argentina,Uco,Mendoza,MymoNS29,-33.41657,-69.16026,30*33,10,cf,Non Agricultural,Monte,,,,,,,,
+MymoNS39,Argentina,Uco,Mendoza,MymoNS39,-33.54152,-69.11025,30*34,10,cf,Non Agricultural,Monte,,,,,,,,
+MymoNS44,Argentina,Uco,Mendoza,MymoNS44,-33.43076,-69.30070,30*35,10,cf,Non Agricultural,Monte,,,,,,,,
+MymoNS52,Argentina,Uco,Mendoza,MymoNS52,-33.46145,-69.02739,30*36,10,cf,Non Agricultural,Monte,,,,,,,,
+MymoNS81,Argentina,Uco,Mendoza,MymoNS81,-33.34105,-69.17913,30*37,10,cf,Non Agricultural,Monte,,,,,,,,

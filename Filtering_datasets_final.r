@@ -155,5 +155,5 @@ colnames(d)[2]="PermanentID"
 colnames(e)[2]="PermanentID"
 
 short.new.data= rbind(a,b,c,d,e)
-#write.csv(short.new.data, file="Data/short.new.data.csv")
+write.csv(short.new.data, file="Data/short.new.data.csv")
 

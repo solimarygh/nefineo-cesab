@@ -119,30 +119,38 @@ long= read.csv("Data/LONGTIME_fung02_samples.csv", sep=";")
 
 diam= cbind(diam, tokeep_NEF=diam.keep$tokeep_NEF)
 diam= subset(diam, diam$tokeep_NEF=="yes")
-new.ID.diam= paste0("NEF_diam_",diam$plot_id,"_2025")
-new.diam= cbind(new.ID=new.ID.diam, diam)
+#grouped by samples at <90m each other 
+dist_matrix_diam= distm(diam[,c("longitude","latitude")], fun = distHaversine)
+cluster_dim= hclust(as.dist(dist_matrix_diam), method = "complete")
+groups_diam <- cutree(cluster_dim, h = 90)
+new.diam= cbind(plot_id=diam[,1], grouped_samples=groups_diam, diam[,2:24])
+new.ID.diam= paste0("NEF_diam_",new.diam$grouped_samples,"_2025")
+new.diam= cbind(new.ID=new.ID.diam, new.diam)
 #write.csv(new.diam, file="Data/new.diam.csv")
 
+#already grouped by samples at <90m each other (colname= "plot")
 dryf= subset(dryf, dryf$tokeep_NEF=="yes")
 new.ID.dryf= paste0("NEF_dryf_",dryf$plot,"_2025")
 new.dryf= cbind(new.ID=new.ID.dryf, dryf)
 #write.csv(new.dryf, file="Data/new.dryf.csv")
 
+#already grouped by samples at <90m (colname= recordNumber)
 new.ID.spun= paste0("NEF_spun_",spun$recordNumber,"_2025")
 new.spun= cbind(new.ID=new.ID.spun, spun)
 #write.csv(new.spun, file="Data/new.spun.csv")
 
-#library(stringr)
-#new.ID.mymo= paste0("NEF_mymo_",str_extract(mymo$id, "(?<=-).*"),"_2025")
+#already grouped by samples at <90m (colname= SampleID)
 new.ID.mymo= paste0("NEF_mymo_",mymo$SampleID,"_2025")
 new.mymo= cbind(new.ID=new.ID.mymo, mymo)
 #write.csv(new.mymo, file="Data/new.mymo.csv")
 
+#already grouped by samples at <90m (colname= SampleID)
 library(stringr)
 new.ID.long= paste0("NEF_long_",str_extract(long$SampleID, "(?<=_).*"),"_2025")
 new.long= cbind(new.ID=new.ID.long, long)
 #write.csv(new.long, file="Data/new.long.csv")
 
+#export to unified file showing new ID and Permanent ID of sample
 a= subset(new.diam,select=c(new.ID, plot_id))
 b= subset(new.dryf,select=c(new.ID, plot))
 c= subset(new.spun,select=c(new.ID, recordNumber))
@@ -155,5 +163,5 @@ colnames(d)[2]="PermanentID"
 colnames(e)[2]="PermanentID"
 
 short.new.data= rbind(a,b,c,d,e)
-write.csv(short.new.data, file="Data/short.new.data.csv")
+#write.csv(short.new.data, file="Data/short.new.data.csv")
 

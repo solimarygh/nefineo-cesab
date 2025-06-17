@@ -2,6 +2,7 @@
 #Use same path: soilgrid_WP2.R 
 
 # 1. Open NEFINEO_MS project #####
+#setwd("~/nefineo-cesab")
 
 # 1.1 Open datasets
 new.diam= read.csv("Data/new.diam.csv")
@@ -11,8 +12,6 @@ new.spun= read.csv("Data/new.spun.csv")
 new.long= read.csv("Data/new.long.csv")
 
 # 1.2 Extract coordinates for each dataset
-#new.diam$latitude, new.diam$longitude #mal escritas
-#xy_mymo= data.frame(lat= new.mymo$Latitude, lon=new.mymo$Longitude) #no ok
 xy_long= data.frame(Latitude= new.long$Latitude, Longitude=new.long$Longitude) #ok
 xy_long= data.frame(new.ID=new.long$new.ID, lapply(xy_long, function(x) round(x,3)))# round 3 digits
 xy_spun= data.frame(Latitude= new.spun$decimalLatitude, Longitude=new.spun$decimalLongitude) #decimals
@@ -363,7 +362,7 @@ for (i in 1:nrow(sites)) {
   
 }
 
-# Add soil properties as new columns in ITS2 dataset ####
+# Add soil properties as new columns in new dataset ####
 sites$nitrogen= nitrogen
 sites$sand= sand
 sites$cec= cec
@@ -372,6 +371,6 @@ sites$phh2o= phh2o
 sites$silt= silt
 
 # Save data.frame as .csv ####
-write.csv(sites, "C:/Users/Usuario/Desktop/WP2_newdata_soil.csv")
+write.csv(sites, "Data/WP2_newdata_soil.csv")
 
 

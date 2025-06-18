@@ -1,32 +1,19 @@
-#Extracting soild data for new datasets 2025
-#Use same path: soilgrid_WP2.R 
+atlas_a= read.csv("Data/new.atlasmxa.csv")
+atlas_b= read.csv("Data/new.atlasmxb.csv", fileEncoding = "latin1")
 
-# 1. Open NEFINEO_MS project #####
-#setwd("~/nefineo-cesab")
+xy_atlas_a= data.frame(new.ID= atlas_a$new.ID, Latitude= atlas_a$latitud, Longitude=atlas_a$longitud)
+xy_atlas_b= data.frame(new.ID= atlas_b$new.ID, Latitude= atlas_b$Latitud, Longitude=atlas_b$Longitud)
+sites= rbind(xy_atlas_a, xy_atlas_b) # convert coordenates from DMS to decimal
 
-# 1.1 Open datasets
-new.diam= read.csv("Data/new.diam.csv")
-new.dryf= read.csv("Data/new.dryf.csv")
-new.mymo= read.csv("Data/new.mymo.csv") 
-new.spun= read.csv("Data/new.spun.csv")
-new.long= read.csv("Data/new.long.csv")
+#install.packages("sp")
+library(sp)
+char2dms(xy_atlas_b$Latitude)
 
-# 1.2 Extract coordinates for each dataset
-xy_long= data.frame(Latitude= new.long$Latitude, Longitude=new.long$Longitude) #ok
-xy_long= data.frame(new.ID=new.long$new.ID, lapply(xy_long, function(x) round(x,3)))# round 3 digits
-xy_spun= data.frame(Latitude= new.spun$decimalLatitude, Longitude=new.spun$decimalLongitude) #decimals
-xy_spun= data.frame(new.ID=new.spun$new.ID, lapply(xy_spun, function(x) as.numeric(gsub(",", ".", x)))) #replace "," by "." 
-xy_dryf= data.frame(new.ID=new.dryf$new.ID, Latitude= new.dryf$y, Longitude=new.dryf$x)
-xy_diam= data.frame(Latitude= new.diam$latitude, Longitude=new.diam$longitude)
-xy_diam= data.frame(new.ID=new.diam$new.ID, lapply(xy_diam, function(x) round(x,3)))# round 3 digits
-xy_mymo= data.frame(Latitude= new.mymo$Latitude, Longitude=new.mymo$Longitude)
-xy_mymo= data.frame(new.ID=new.mymo$new.ID, lapply(xy_mymo, function(x) round(x,3)))# round 3 digits
+#terminar...
 
-sites= rbind(xy_long, xy_spun, xy_dryf, xy_diam, xy_mymo) #all coords
-
-# 2. Open and install packages ####   
+## 2. Open and install packages ####   
 # Packages we will need
-packages <- c("geosphere", "raster", "sf", "stats", "sp")
+#packages <- c("geosphere", "raster", "sf", "stats", "sp")
 library(geosphere)
 library(stats)
 
@@ -369,8 +356,3 @@ sites$cec= cec
 sites$soc= soc
 sites$phh2o= phh2o
 sites$silt= silt
-
-# Save data.frame as .csv ####
-write.csv(sites, "Data/WP2_newdata_soil.csv")
-
-

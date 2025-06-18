@@ -2,7 +2,7 @@
 #Use same path: soilgrid_WP2.R 
 
 # 1. Open NEFINEO_MS project #####
-#setwd("~/nefineo-cesab")
+setwd("~/nefineo-cesab")
 
 # 1.1 Open datasets
 new.diam= read.csv("Data/new.diam.csv")
@@ -26,14 +26,12 @@ sites= rbind(xy_long, xy_spun, xy_dryf, xy_diam, xy_mymo) #all coords
 
 # 2. Open and install packages ####   
 # Packages we will need
-packages <- c("geosphere", "raster", "sf", "stats", "sp")
 library(geosphere)
-library(stats)
 
 # 3. Identify clustered sites #### 
 # 3.1. Calculate distance matrix between sites
-x= sites[,c(2,3)]
-dist= distm(x, fun = distHaversine)
+x= sites[,c(3,2)]
+dist= distm(x, fun = distHaversine) #
 
 # 3.2. Calculate hierarchical clustering 
 clustering= hclust(as.dist(dist), method = "complete")

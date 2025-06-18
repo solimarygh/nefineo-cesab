@@ -1,25 +1,23 @@
+#Extracting soild data from mexico datasets (Bernardo)
+#Use same path: soilgrid_WP2.R 
+
+# 1. Open NEFINEO_MS project #####
+#setwd("~/nefineo-cesab")
+
+# 1.1 Open datasets
 atlas_a= read.csv("Data/new.atlasmxa.csv")
 atlas_b= read.csv("Data/new.atlasmxb.csv", fileEncoding = "latin1")
 
 xy_atlas_a= data.frame(new.ID= atlas_a$new.ID, Latitude= atlas_a$latitud, Longitude=atlas_a$longitud)
 xy_atlas_b= data.frame(new.ID= atlas_b$new.ID, Latitude= atlas_b$Latitud, Longitude=atlas_b$Longitud)
-sites= rbind(xy_atlas_a, xy_atlas_b) # convert coordenates from DMS to decimal
+sites= rbind(xy_atlas_a, xy_atlas_b) 
 
-#install.packages("sp")
-library(sp)
-char2dms(xy_atlas_b$Latitude)
-
-#terminar...
-
-## 2. Open and install packages ####   
-# Packages we will need
-#packages <- c("geosphere", "raster", "sf", "stats", "sp")
+## 2. Open packages ####   
 library(geosphere)
-library(stats)
 
 # 3. Identify clustered sites #### 
 # 3.1. Calculate distance matrix between sites
-x= sites[,c(2,3)]
+x= sites[,c(3,2)]
 dist= distm(x, fun = distHaversine)
 
 # 3.2. Calculate hierarchical clustering 
@@ -356,3 +354,6 @@ sites$cec= cec
 sites$soc= soc
 sites$phh2o= phh2o
 sites$silt= silt
+
+# Save data.frame as .csv ####
+write.csv(sites, "Data/WP2_newdata_mex_soil.csv")

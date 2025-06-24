@@ -11,14 +11,14 @@
 # Due to many sites in the ITS2 data set are close to each other...
 # I clustered sites and used the same raster to extract soil values (at 150k).
 
+# 0. Open NEFINEO_MS project #####
+setwd("~/nefineo-cesab")
 
-# 1. Open coordinates for ITS2 data #####
-# 1.1 Downloaded NEFINEO>WP2>info_dataset>WP2_coordinates_ITS2.csv
-
-# 1.2 Open geographical coordinates (all sites)
-setwd("C:/Users/Usuario/Dropbox") #my directory
-sites= read.csv("WP2_coordinates_ITS2.csv")
-
+# 1. Open datasets its1/its2 #####
+# 1.1 no grouped samples (site=sample)
+its1= read.csv("Data/new.its1.csv", row.names=1)
+its2= read.csv("Data/new.its2.csv", row.names= 1)
+  
 # 2. Open and install packages ####   
 
 # Packages we will need
@@ -28,13 +28,16 @@ packages <- c("geosphere", "raster", "sf", "stats", "sp")
 install<- packages[!packages%in% installed.packages()[, "Package"]]
 if (length(install)) install.packages(install) ##
 
-
 library(geosphere)
 library(stats)
 
 # 3. Identify clustered sites #### 
-# 3.1. Calculate distance matrix between sites
-x= sites[,c(2,3)]
+# 3.1. Calculate distance matrix between sites 
+#first for its1, then replace by its2 and run again
+sites= rbind(data.frame(new.ID=its1$new.ID, Latitude=its1$latitude, Longitude=its1$longitude),
+             data.frame(new.ID=its2$new.ID, Latitude=its2$latitude, Longitude=its2$longitude))
+
+x= sites[,c("Longitude","Latitude")]
 dist= distm(x, fun = distHaversine)
 
 # 3.2. Calculate hierarchical clustering 
@@ -364,7 +367,7 @@ for (i in 1:nrow(sites)) {
 }
 
 # Add soil properties as new columns in ITS2 dataset ####
-sites$nitogen= nitrogen
+sites$nitrogen= nitrogen
 sites$sand= sand
 sites$cec= cec
 sites$soc= soc
@@ -372,6 +375,6 @@ sites$phh2o= phh2o
 sites$silt= silt
 
 # Save data.frame as .csv ####
-#write.csv(sites, "C:/Users/Usuario/Desktop/WP2_ITS2_soil.csv")
+write.csv(sites, "Data/soilgrid_its1_its2.csv")
 
 

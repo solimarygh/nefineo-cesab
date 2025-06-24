@@ -374,7 +374,28 @@ sites$soc= soc
 sites$phh2o= phh2o
 sites$silt= silt
 
+# Save data.frame as .csv ###
+#write.csv(sites, "Data/soilgrid_its1_its2.csv")
+
+#Filtering rows by paper to keep and neotropics
+its1= read.csv("Data/new.its1.csv", row.names=1)
+#filtering by papers to keep and bioregion
+its1.f= subset(its1, paper_to_keep=="yes" & 
+                 morrone_biogeoregions_Region== "Neotropical") 
+
+its2= read.csv("Data/new.its2.csv", row.names= 1)
+#filtering by papers to keep and bioregion
+its2.f= subset(its2, paper_to_keep=="yes" & 
+                 morrone_biogeoregions_Region== "Neotropical") 
+
+rows.to.keep= match(c(its1.f$new.ID, its2.f$new.ID),sites$new.ID)
+sites.to.keep= sites[rows.to.keep,]
+
 # Save data.frame as .csv ####
-write.csv(sites, "Data/soilgrid_its1_its2.csv")
+write.csv(sites.to.keep, "Data/soilgrid_its1_its2_filtered.csv")
 
-
+# Missing data ####
+#soil grid missing data for any property (e.g. nitrogen)
+missing_soil= subset(sites.to.keep, nitrogen == 0 | is.na(nitrogen))
+miss_soil_n_samples= unique(missing_soil$new.ID)
+length(miss_soil_n_samples) #nº of missing grouped samples 98/1094 

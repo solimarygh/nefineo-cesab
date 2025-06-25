@@ -356,4 +356,11 @@ sites$phh2o= phh2o
 sites$silt= silt
 
 # Save data.frame as .csv ####
-write.csv(sites, "Data/WP2_newdata_mex_soil.csv")
+#write.csv(sites, "Data/WP2_newdata_mex_soil.csv")
+
+# Missing data ####
+#soil grid missing data for any property (e.g. nitrogen)
+missing_soil= subset(WP2_newdata_mex_soil, nitrogen == 0 | is.na(nitrogen))
+miss_soil_n_samples= unique(missing_soil$new.ID)
+length(unique(WP2_newdata_mex_soil$new.ID)) #nº of grouped samples 151
+length(miss_soil_n_samples) #nº of missing grouped samples 2/151 

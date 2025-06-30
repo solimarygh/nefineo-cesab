@@ -11,7 +11,7 @@ its.dataset= read.csv("Data/soilgrid_its1_its2_filtered.csv")[,-1] #remove first
 mex.dataset= read.csv("Data/WP2_newdata_mex_soil.csv")[,-1] #remove first col. 
 #Groups column corresponds of grouping by raster image  
 
-# 2.2 Open bioregional data ####
+# 2.2 Open biogeographical data ####
 its1= read.csv("Data/new.its1.csv")
 its1= subset(its1, paper_to_keep=="yes" & 
          morrone_biogeoregions_Region=="Neotropical")[,"morrone_biogeoregions_Subregion"]

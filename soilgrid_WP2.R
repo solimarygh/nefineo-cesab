@@ -392,7 +392,7 @@ rows.to.keep= match(c(its1.f$new.ID, its2.f$new.ID),sites$new.ID)
 sites.to.keep= sites[rows.to.keep,]
 
 # Save data.frame as .csv ####
-write.csv(sites.to.keep, "Data/soilgrid_its1_its2_filtered.csv")
+#write.csv(sites.to.keep, "Data/soilgrid_its1_its2_filtered.csv")
 
 # Missing data ####
 #soil grid missing data for any property (e.g. nitrogen)

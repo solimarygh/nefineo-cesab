@@ -370,6 +370,8 @@ sites$silt= silt
 
 # Save data.frame as .csv ####
 #write.csv(sites, "Data/WP2_newdata_soil.csv")
+#WP2_newdata_soil[-8,] #repited P8=P3 
+#write.csv(WP2_newdata_soil, "Data/WP2_newdata_soil.csv")
 
 # Missing data ####
 #soil grid missing data for any property (e.g. nitrogen)

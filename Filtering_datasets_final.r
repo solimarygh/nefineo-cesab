@@ -116,6 +116,7 @@ dryf= read.csv("Data/metabarlist_fung02_for_nefineo_samples_MR.csv", sep=";")
 spun= read.csv("Data/Muestras Proyecto SPUN.xlsx - Darwin Core data.csv")
 mymo= read.csv("Data/Mymo_ITS_tax_forNEFINEO_seq.csv", sep=",")
 long= read.csv("Data/LONGTIME_fung02_samples.csv", sep=";")
+long=long[,-8] #repited coordinates
 
 diam= cbind(diam, tokeep_NEF=diam.keep$tokeep_NEF)
 diam= subset(diam, diam$tokeep_NEF=="yes")

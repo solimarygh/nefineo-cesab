@@ -109,6 +109,59 @@ to_use_its2= subset(new.its2, c(paper_to_keep=="yes" &
 #write.csv(to_use_its1, file="Data/short.new.its1.csv")
 #write.csv(to_use_its2, file="Data/short.new.its2.csv")
 
+#Export dataset as .csv ####
+#Filter data with a new column of number of grouping samples and ...
+#without duplicated data from both_its   
+new.its1= read.csv("Data/new.its1.csv") 
+new.its2= read.csv("Data/new.its2.csv")
+
+sum(new.its2$target_gene=="ITSboth") #854 both
+sum(new.its1$target_gene=="ITSboth") #1130 both
+
+#filtering by papers to keep and neotropical regions
+new.its1= subset(new.its1, c(paper_to_keep=="yes" & 
+                     morrone_biogeoregions_Region=="Neotropical"))
+
+#adding a col with the number of aggregated samples
+n_aggregated_samples= data.frame(table(new.its1$new.ID))
+order_col= unique(match(as.factor(new.its1$new.ID),n_aggregated_samples$Var1))
+n_aggregated_samples= n_aggregated_samples[order_col,]
+df_aggregated_samples= data.frame(
+  new.ID= rep(n_aggregated_samples$Var1, n_aggregated_samples$Freq),
+  number_aggregated_samples= rep(n_aggregated_samples$Freq, n_aggregated_samples$Freq))
+
+new2.its1= cbind(new.its1[,1:2],n_aggregated_samples= 
+                   df_aggregated_samples$number_aggregated_samples, new.its1[,3:175])
+
+
+#filtering by papers to keep and neotropical regions
+new.its2= subset(new.its2, c(paper_to_keep=="yes" & 
+                               morrone_biogeoregions_Region=="Neotropical"))
+#adding a col with the number of aggregated samples
+n_aggregated_samples2= data.frame(table(new.its2$new.ID))
+order_col2= unique(match(as.factor(new.its2$new.ID),n_aggregated_samples2$Var1))
+n_aggregated_samples2= n_aggregated_samples2[order_col2,]
+df_aggregated_samples2= data.frame(
+  new.ID= rep(n_aggregated_samples2$Var1, n_aggregated_samples2$Freq),
+  number_aggregated_samples= rep(n_aggregated_samples2$Freq, n_aggregated_samples2$Freq))
+
+new2.its2= cbind(new.its2[,1:2],n_aggregated_samples= 
+                   df_aggregated_samples2$number_aggregated_samples, new.its2[,3:175])
+
+#Eliminating duplicated sites by both_its in its2
+new3.its2= subset(new2.its2, target_gene == "ITS2")
+unique(new3.its2$target_gene) #check only ITS2
+
+sum(new2.its2$target_gene=="ITSboth") #571 both
+sum(new2.its1$target_gene=="ITSboth") #761 both
+
+match(as.vector(subset(new2.its1, target_gene=="ITSboth", PermanentID)),
+as.vector(subset(new2.its2, target_gene=="ITSboth", PermanentID))) #no same permanentID
+
+#Exporting datasets
+write.csv(new2.its1, file="Data/new2.its1.csv")
+write.csv(new2.its2, file="Data/new2.its2.csv")
+
 #Add new datasets #####
 diam= read.csv("Data/French_Guiana_soil_eDNA_metabarcoding_metadata_20.09.2024.csv", sep=",")
 diam.keep= read.csv("Data/French_Guiana_soil_eDNA_metabarcoding_metadata_20.09.2024_MR.csv", sep=";")

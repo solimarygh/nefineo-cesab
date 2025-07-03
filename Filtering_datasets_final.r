@@ -115,12 +115,15 @@ to_use_its2= subset(new.its2, c(paper_to_keep=="yes" &
 new.its1= read.csv("Data/new.its1.csv") 
 new.its2= read.csv("Data/new.its2.csv")
 
-sum(new.its2$target_gene=="ITSboth") #854 both
-sum(new.its1$target_gene=="ITSboth") #1130 both
+#sum(new.its2$target_gene=="ITSboth") #854 both
+#sum(new.its1$target_gene=="ITSboth") #1130 both
 
 #filtering by papers to keep and neotropical regions
 new.its1= subset(new.its1, c(paper_to_keep=="yes" & 
                      morrone_biogeoregions_Region=="Neotropical"))
+#new filter
+unique(new.its1$paper_id)
+new.its1= subset(new.its1, paper_id != "Donald_2021_SQ")
 
 #adding a col with the number of aggregated samples
 n_aggregated_samples= data.frame(table(new.its1$new.ID))
@@ -137,6 +140,10 @@ new2.its1= cbind(new.its1[,1:2],n_aggregated_samples=
 #filtering by papers to keep and neotropical regions
 new.its2= subset(new.its2, c(paper_to_keep=="yes" & 
                                morrone_biogeoregions_Region=="Neotropical"))
+#new.filter
+unique(new.its2$sample_type) #"litter"
+new.its2= subset(new.its2, sample_type != "litter")
+
 #adding a col with the number of aggregated samples
 n_aggregated_samples2= data.frame(table(new.its2$new.ID))
 order_col2= unique(match(as.factor(new.its2$new.ID),n_aggregated_samples2$Var1))
@@ -157,6 +164,50 @@ sum(new2.its1$target_gene=="ITSboth") #761 both
 
 match(as.vector(subset(new2.its1, target_gene=="ITSboth", PermanentID)),
 as.vector(subset(new2.its2, target_gene=="ITSboth", PermanentID))) #no same permanentID
+
+##### 
+#Remove PacBio Sequencing method because are repetidead in bothITS
+sum(new2.its1$sequencing_platform=="PacBio") #467
+sum(new2.its2$sequencing_platform=="PacBio") #467
+
+new2.its1_notboth= subset(new.its1, c(paper_to_keep=="yes" & 
+                                        morrone_biogeoregions_Region=="Neotropical") &
+                            paper_id != "Donald_2021_SQ" &
+                            sequencing_platform != "PacBio"
+)
+nrow(new2.its1_notboth)
+length(unique(new2.its1_notboth$new.ID))
+
+new2.its2_notboth= subset(new.its2, c(paper_to_keep=="yes" & 
+                                        morrone_biogeoregions_Region=="Neotropical") &
+                            sample_type != "litter" &
+                            sequencing_platform != "PacBio"
+)
+nrow(new2.its2_notboth)
+length(unique(new2.its2_notboth$new.ID))
+
+new2.itsboth= subset(new2.its1, c(paper_to_keep=="yes" & 
+                                    morrone_biogeoregions_Region=="Neotropical") &
+                       paper_id != "Donald_2021_SQ" &
+                       sequencing_platform == "PacBio"
+)
+nrow(new2.itsboth)
+length(unique(new2.itsboth$new.ID))
+
+NET.dataset= c(rep("ITS1",nrow(new2.its1_notboth)),
+               rep("ITS2",nrow(new2.its2_notboth)),
+               rep("ITS_both",nrow(new2.itsboth)))
+length(NET.dataset) #2173
+
+short_its= rbind(new2.its1_notboth[,c("new.ID","PermanentID","sequencing_platform")],
+                 new2.its2_notboth[,c("new.ID","PermanentID","sequencing_platform")], 
+                 new2.itsboth[,c("new.ID","PermanentID","sequencing_platform")]) 
+short_its= cbind(short_its, NET.dataset)
+table(short_its$NET.dataset)
+
+sum(table(short_its$NET.dataset,short_its$sequencing_platform)) #2173 samples
+
+write.csv(short_its, file="Data/short_its.csv")
 
 #Exporting datasets
 write.csv(new2.its1, file="Data/new2.its1.csv")

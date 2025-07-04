@@ -1,0 +1,176 @@
+x;to_keep;nota
+new.ID;y;
+dataset;n;
+NEF.dataset;y;
+Database_ID;n;
+PermanentID;y;
+grouped_samples;n;
+add_date;n;
+paper_id;n;
+paper_to_keep;n;
+title;n;
+year;n;
+authors;n;
+journal;n;
+doi;n;
+contact;n;
+sample_name;n;
+sample_type;y;
+manipulated;n;
+sample_description;n;
+latitude;y;
+longitude;y;
+continent;n;
+year_of_sampling;y;
+Biome;y;tipo vegetaci—n
+sequencing_platform;y;
+target_gene;y;
+primers;n;
+primers_sequence;n;
+sample_seqid;n;
+sample_barcode;n;
+globfungi_elevation;y;
+MAT;y;
+MAP;y;
+MAT_study;y;
+MAP_study;y;
+Biome_detail;y;
+country;y;
+month_of_sampling;n;
+day_of_sampling;n;
+plants_dominant;n;
+plants_all;n;
+area_sampled;n;
+number_of_subsamples;n;
+sampling_info;n;
+sample_depth;n;
+extraction_DNA_mass;n;
+extraction_DNA_size;n;
+extraction_DNA_method;n;
+total_C_content;n;
+total_N_content;n;
+organic_matter_content;n;
+pH;n;
+pH_method;n;
+total_Ca;n;
+total_P;n;
+total_K;n;
+sample_info;n;
+location;n;
+area_GPS;n;
+ITS1_extracted;n;
+ITS2_extracted;n;
+ITS_total;n;
+pH_0cm_depth;n;
+SOC_0cm_depth..;n;
+globfungi_elev...GPS.visualizer;n;
+morrone_biogeoregions_IDProv;y;
+morrone_biogeoregions_IDSubreg;y;
+morrone_biogeoregions_Region;y;
+morrone_biogeoregions_Subregion;y;
+morrone_biogeoregions_IDProvince;y;
+morrone_biogeoregions_IDDominio;y;
+morrone_biogeoregions_Provincias;y;
+morrone_biogeoregions_Area_km;y;
+morrone_biogeoregions_Dominio;y;
+morrone_biogeoregions_Perimetro;y;
+morrone_biogeoregions_SubDominio;y;
+wwf_ecoregions_OBJECTID;y;
+wwf_ecoregions_AREA;y;
+wwf_ecoregions_PERIMETER;y;
+wwf_ecoregions_ECO_NAME;y;
+wwf_ecoregions_REALM;y;
+wwf_ecoregions_BIOME;y;
+wwf_ecoregions_ECO_NUM;y;
+wwf_ecoregions_ECO_ID;y;
+wwf_ecoregions_ECO_SYM;y;
+wwf_ecoregions_GBL_STAT;y;
+wwf_ecoregions_G200_REGIO;y;
+wwf_ecoregions_G200_NUM;y;
+wwf_ecoregions_G200_BIOME;y;
+wwf_ecoregions_G200_STAT;y;
+wwf_ecoregions_Shape_Leng;y;
+wwf_ecoregions_Shape_Area;y;
+wwf_ecoregions_area_km2;y;
+wwf_ecoregions_eco_code;y;
+wwf_ecoregions_PER_area;y;
+wwf_ecoregions_PER_area_1;y;
+wwf_ecoregions_PER_area_2;y;
+elevatr_elevation_4.5km2;n;viene de uma origen distinta de los otros datos de clima - Melanies reviso el script 01_get_resources.R --- menos resolution!!!! Mejor la variable de climenv
+climenv_annavg_tavg_m;y;
+climenv_annavg_abmt;y;
+climenv_annavg_tmin_m;y;
+climenv_annavg_tmax_m;y;
+climenv_annavg_prec_m;y;
+climenv_elev;y;climenv - paquete em github ---- better than the other data of elevation
+climenv_lat;n;climenv - paquete em github
+climenv_monthavg_tavg_m_Jan;y;climenv - paquete em github
+climenv_monthavg_tavg_m_Feb;y;climenv - paquete em github
+climenv_monthavg_tavg_m_Mar;y;climenv - paquete em github
+climenv_monthavg_tavg_m_Apr;y;climenv - paquete em github
+climenv_monthavg_tavg_m_May;y;climenv - paquete em github
+climenv_monthavg_tavg_m_Jun;y;climenv - paquete em github
+climenv_monthavg_tavg_m_Jul;y;climenv - paquete em github
+climenv_monthavg_tavg_m_Aug;y;climenv - paquete em github
+climenv_monthavg_tavg_m_Sep;y;climenv - paquete em github
+climenv_monthavg_tavg_m_Oct;y;climenv - paquete em github
+climenv_monthavg_tavg_m_Nov;y;climenv - paquete em github
+climenv_monthavg_tavg_m_Dec;y;climenv - paquete em github
+climenv_monthavg_abmt_Jan;y;climenv - paquete em github
+climenv_monthavg_abmt_Feb;y;climenv - paquete em github
+climenv_monthavg_abmt_Mar;y;climenv - paquete em github
+climenv_monthavg_abmt_Apr;y;climenv - paquete em github
+climenv_monthavg_abmt_May;y;climenv - paquete em github
+climenv_monthavg_abmt_Jun;y;climenv - paquete em github
+climenv_monthavg_abmt_Jul;y;climenv - paquete em github
+climenv_monthavg_abmt_Aug;y;climenv - paquete em github
+climenv_monthavg_abmt_Sep;y;climenv - paquete em github
+climenv_monthavg_abmt_Oct;y;climenv - paquete em github
+climenv_monthavg_abmt_Nov;y;climenv - paquete em github
+climenv_monthavg_abmt_Dec;y;climenv - paquete em github
+climenv_monthavg_tmin_m_Jan;y;climenv - paquete em github
+climenv_monthavg_tmin_m_Feb;y;climenv - paquete em github
+climenv_monthavg_tmin_m_Mar;y;climenv - paquete em github
+climenv_monthavg_tmin_m_Apr;y;climenv - paquete em github
+climenv_monthavg_tmin_m_May;y;climenv - paquete em github
+climenv_monthavg_tmin_m_Jun;y;climenv - paquete em github
+climenv_monthavg_tmin_m_Jul;y;climenv - paquete em github
+climenv_monthavg_tmin_m_Aug;y;climenv - paquete em github
+climenv_monthavg_tmin_m_Sep;y;climenv - paquete em github
+climenv_monthavg_tmin_m_Oct;y;climenv - paquete em github
+climenv_monthavg_tmin_m_Nov;y;climenv - paquete em github
+climenv_monthavg_tmin_m_Dec;y;climenv - paquete em github
+climenv_monthavg_tmax_m_Jan;y;climenv - paquete em github
+climenv_monthavg_tmax_m_Feb;y;climenv - paquete em github
+climenv_monthavg_tmax_m_Mar;y;climenv - paquete em github
+climenv_monthavg_tmax_m_Apr;y;climenv - paquete em github
+climenv_monthavg_tmax_m_May;y;climenv - paquete em github
+climenv_monthavg_tmax_m_Jun;y;climenv - paquete em github
+climenv_monthavg_tmax_m_Jul;y;climenv - paquete em github
+climenv_monthavg_tmax_m_Aug;y;climenv - paquete em github
+climenv_monthavg_tmax_m_Sep;y;climenv - paquete em github
+climenv_monthavg_tmax_m_Oct;y;climenv - paquete em github
+climenv_monthavg_tmax_m_Nov;y;climenv - paquete em github
+climenv_monthavg_tmax_m_Dec;y;climenv - paquete em github
+climenv_monthavg_prec_m_Jan;y;climenv - paquete em github
+climenv_monthavg_prec_m_Feb;y;climenv - paquete em github
+climenv_monthavg_prec_m_Mar;y;climenv - paquete em github
+climenv_monthavg_prec_m_Apr;y;climenv - paquete em github
+climenv_monthavg_prec_m_May;y;climenv - paquete em github
+climenv_monthavg_prec_m_Jun;y;climenv - paquete em github
+climenv_monthavg_prec_m_Jul;y;climenv - paquete em github
+climenv_monthavg_prec_m_Aug;y;climenv - paquete em github
+climenv_monthavg_prec_m_Sep;y;climenv - paquete em github
+climenv_monthavg_prec_m_Oct;y;climenv - paquete em github
+climenv_monthavg_prec_m_Nov;y;climenv - paquete em github
+climenv_monthavg_prec_m_Dec;y;climenv - paquete em github
+climenv_abt;y;climenv - paquete em github
+climenv_tap;y;climenv - paquete em github
+climenv_per;y;climenv - paquete em github
+climenv_holdridge_class;y;
+nitogen;y;
+sand;y;
+cec;y;
+soc;y;
+phh2o;y;
+silt;y;

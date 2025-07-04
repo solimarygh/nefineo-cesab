@@ -284,8 +284,13 @@ new_spun_centroid<- new_spun %>%
 
 #### ITS1 only ----
 ##
-new_its1 <- read_csv("Data/new2.its1.csv") #teste com dados new.its1
-colnames (new_its1 )
+new_its1 <- read_csv("Data/new.its1.csv") #teste com dados new.its1
+table(as.factor(new_its1$sample_type))
+
+table(new_its1$year)
+
+
+#colnames (new_its1 )
 new_its1_filtro <- new_its1 %>%
   filter(
     paper_to_keep == "yes",
@@ -296,9 +301,12 @@ new_its1_filtro <- new_its1 %>%
   )
 
 
+
+
+
 nrow (new_its1_filtro )# 965   
 length (unique (new_its1_filtro$new.ID))#77
-
+table (unique (new_its1_filtro$new.ID))
 
 # Convertir a objeto sf
 sf_its1 <- st_as_sf(new_its1_filtro, coords = c("longitude", "latitude"), crs = 4326)
@@ -340,7 +348,7 @@ nrow (new.its1_sites_centroid) #77
 
 
 ####### ITS2 only-----
-new_its2 <- read_csv("Data/new2.its2.csv") #teste com dados new.its2
+new_its2 <- read_csv("Data/new.its2.csv") #teste com dados new.its2
 
 
 new_its2_filtro <- new_its2 %>%
@@ -403,15 +411,19 @@ new_itsboth_filtro <- new_itsboth %>%
     paper_to_keep == "yes",
     morrone_biogeoregions_Region == "Neotropical",
     sequencing_platform == "PacBio",
-    !(sample_type %in% c("litter"))
+    paper_id != "Donald_2021_SQ"
+    #!(sample_type %in% c("litter"))
   )
 
-colnames(new_itsboth)
 
+
+
+
+#colnames(new_itsboth)
 
 levels(as.factor(new_itsboth_filtro$target_gene))
-nrow (new_itsboth_filtro )# 429
-length (unique (new_itsboth_filtro$new.ID)) # 384
+nrow (new_itsboth_filtro )# 467
+length (unique (new_itsboth_filtro$new.ID)) # 385
 
 
 # Convertir a objeto sf
@@ -454,7 +466,7 @@ nrow (new.itsboth_sites_centroid) #384
 
 
 
-
+new_its1_filtro, new.its2_sites_centroid
 
 ### Mapa Global FUNGi ------
 Neotropic_Map <- st_read("geodata_neotropic/NeotropicMap_Geo.shp")

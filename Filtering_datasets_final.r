@@ -11,31 +11,37 @@
 #5. Export short datasets indicating new ID and permanent ID of each sample
 #6. Create new ID for new datasets (no global fungi) and write individual .csv for each study   
 
-#Set working directory from NEFINEO_MS.Rproj####
-#github directory
-list.files() #check files in folder
-#Datasets in folder: Data
+# Set working directory from NEFINEO_MS.Rproj####
 
-#Open datasets ####
-#final dataset its1 
+#github directory
+setwd("~/nefineo-cesab")
+
+# Open datasets ####
+
+#dataset its1 
 its1= read.table("Data/globfungi_metadata_filtered_complemented_its1_soil.tsv", 
                  sep ="\t",)
 length(unique(its1$PermanentID)) #check ID by sample #2815 samples
-#final dataset of articles to keep in its1 (no plantations)
+
+#dataset of articles to keep in its1 (no plantations)
 its1.plant= read.csv("Data/article_list_noplantation.its1.csv")
-#final dataset its2
+
+#dataset its2
 its2= read.table("Data/globfungi_metadata_filtered_complemented_its2_soil.tsv", 
                  sep ="\t",)
 length(unique(its2$PermanentID)) #check ID by sample #2380 samples
-#final dataset of articles to keep in its2 (no plantations)
+
+#dataset of articles to keep in its2 (no plantations)
 its2.plant= read.csv("Data/article_list_noplantation.its2.csv")
 
-#Create new vector of articles to keep in datasets its1/its2 ####
+# Create new vector of articles to keep in datasets its1/its2 ####
+
 #its1
 keep.its1= subset(its1.plant, To_keep=="yes", select= title) #articles to keep
 nrow(keep.its1) #20 articles to keep
 v.keep.its1= match(its1$paper_id, keep.its1$title) #vector with articles to keep
 v.keep.its1= ifelse(is.na(v.keep.its1), "no", "yes") #reemplace Na by "no"
+
 #its2
 keep.its2= subset(its2.plant, To_keep=="yes", select= title) #articles to keep
 nrow(keep.its2) #28 articles to keep
@@ -46,13 +52,15 @@ v.keep.its2= ifelse(is.na(v.keep.its2), "no", "yes") #reemplace Na by "no"
 new.its1= cbind(its1[,1:5], paper_to_keep=v.keep.its1, its1[,6:171])
 new.its2= cbind(its2[,1:5], paper_to_keep=v.keep.its2, its2[,6:171])
 
-#Create new vector of grouped samples by a threshold of 90m of proximity ####
+# Create new vector of grouped samples by a threshold of 90m of proximity ####
+
 #install packages if need it
 library (dplyr)
 library (geosphere)
 
 #matrix distance of sampling sites of its1
 dist_matrix_its1 <- distm(new.its1[,c("longitude","latitude")], fun = distHaversine)
+
 #matrix distance of sampling sites of its2
 dist_matrix_its2 <- distm(new.its2[,c("longitude","latitude")], fun = distHaversine)
 
@@ -64,87 +72,87 @@ cluster_its2 <- hclust(as.dist(dist_matrix_its2), method = "complete")
 groups_its1 <- cutree(cluster_its1, h = 90) #new vector of grouped samples
 groups_its2 <- cutree(cluster_its2, h = 90) #new vector of grouped samples
 
-#Add new vector of grouped samples to datasets ####
+# Add new vector of grouped samples to datasets ####
 new.its1= cbind(new.its1[,1:3], grouped_samples=groups_its1, new.its1[,4:172])
 new.its2= cbind(new.its2[,1:3], grouped_samples=groups_its2, new.its2[,4:172])
 
-#Create new permanent ID for grouped samples ####
+# Create new permanent ID for grouped samples ####
 new.ID.its1= paste0("NEF_GloFung-its1_",new.its1$grouped_samples,"_",new.its1$year)
 new.ID.its2= paste0("NEF_GloFung-its2_",new.its2$grouped_samples,"_",new.its2$year)
 
-#Add column for new ID
+# Add column for new ID ####
 new.its1= cbind(new.ID= new.ID.its1, new.its1[,1:173])
 new.its2= cbind(new.ID= new.ID.its2, new.its2[,1:173])
 
-#Checking final datasets ####
+# Checking final datasets ####
+
+#complete dataset
 length(which(new.its1[,"paper_to_keep"]=="yes",TRUE)) #1829 non-grouped samples
+
+#filtering by papers to keep and neotropical sites
 final.its1= subset(new.its1, paper_to_keep=="yes" & 
-    morrone_biogeoregions_Region=="Neotropical") #filtering by papers to keep
+    morrone_biogeoregions_Region=="Neotropical") 
+
+#filtered dataset
 length(unique(final.its1$grouped_samples)) #466 grouped samples 
 
+#complete dataset
 length(which(new.its2[,"paper_to_keep"]=="yes",TRUE))#1435 non-grouped samples
+
+#filtering by papers to keep and neotropical sites
 final.its2= subset(new.its2, paper_to_keep=="yes" & 
-                     morrone_biogeoregions_Region=="Neotropical") #filtering by papers to keep 
+                     morrone_biogeoregions_Region=="Neotropical")  
+
+#filtered dataset
 length(unique(final.its2$grouped_samples)) #608 grouped samples 
 
-#check grouped samples from more than 1 study 
+#check grouped samples from more than 1 study ####
+#grouped samples (new.ID) including  more than 1 study
+
 #its1
 studies.its1= tapply(final.its1$paper_id, final.its1$new.ID, function(x) length(unique(x)))
-n.studies.its1= studies.its1[studies.its1 > 1]#grouped samples (new.ID) including  more than 1 study 
+n.studies.its1= studies.its1[studies.its1 > 1]  # zero
+
 #its2
 studies.its2= tapply(final.its2$paper_id, final.its2$new.ID, function(x) length(unique(x)))
-n.studies.its2= studies.its2[studies.its2 > 1] 
+n.studies.its2= studies.its2[studies.its2 > 1] # zero
 
 #Export datasets as .csv ####
 #write.csv(new.its1, file="Data/new.its1.csv")
 #write.csv(new.its2, file="Data/new.its2.csv")
 
 #Export datasets as .csv ####
-#Filter useful columns
+#Filter useful columns for bioinformatics 
 to_use_its1= subset(new.its1, c(paper_to_keep=="yes" & 
     morrone_biogeoregions_Region=="Neotropical"),select=c(new.ID,PermanentID))
+
 to_use_its2= subset(new.its2, c(paper_to_keep=="yes" & 
     morrone_biogeoregions_Region=="Neotropical"), select=c(new.ID,PermanentID))
 
 #write.csv(to_use_its1, file="Data/short.new.its1.csv")
 #write.csv(to_use_its2, file="Data/short.new.its2.csv")
 
-#Export dataset as .csv ####
-#Filter data with a new column of number of grouping samples and ...
-#without duplicated data from both_its   
+# New filters including during Nefineo meeting Montpellier ####
+
+#Open datasets #
 new.its1= read.csv("Data/new.its1.csv") 
 new.its2= read.csv("Data/new.its2.csv")
 
-#sum(new.its2$target_gene=="ITSboth") #854 both
-#sum(new.its1$target_gene=="ITSboth") #1130 both
-
-#filtering by papers to keep and neotropical regions
-new.its1= subset(new.its1, c(paper_to_keep=="yes" & 
-                     morrone_biogeoregions_Region=="Neotropical"))
-#new filter
-unique(new.its1$paper_id)
-new.its1= subset(new.its1, paper_id != "Donald_2021_SQ")
-
-#adding a col with the number of aggregated samples
-n_aggregated_samples= data.frame(table(new.its1$new.ID))
+#its1
+#New column of number of grouping samples by new ID
+n_aggregated_samples= data.frame(table(new.its1$new.ID)) #470 
 order_col= unique(match(as.factor(new.its1$new.ID),n_aggregated_samples$Var1))
 n_aggregated_samples= n_aggregated_samples[order_col,]
 df_aggregated_samples= data.frame(
   new.ID= rep(n_aggregated_samples$Var1, n_aggregated_samples$Freq),
   number_aggregated_samples= rep(n_aggregated_samples$Freq, n_aggregated_samples$Freq))
 
+#Add a col with the number of aggregated samples by new.ID
 new2.its1= cbind(new.its1[,1:2],n_aggregated_samples= 
-                   df_aggregated_samples$number_aggregated_samples, new.its1[,3:175])
+      df_aggregated_samples$number_aggregated_samples, new.its1[,3:175])
 
-
-#filtering by papers to keep and neotropical regions
-new.its2= subset(new.its2, c(paper_to_keep=="yes" & 
-                               morrone_biogeoregions_Region=="Neotropical"))
-#new.filter
-unique(new.its2$sample_type) #"litter"
-new.its2= subset(new.its2, sample_type != "litter")
-
-#adding a col with the number of aggregated samples
+#its2
+#New column of number of grouping samples by new ID
 n_aggregated_samples2= data.frame(table(new.its2$new.ID))
 order_col2= unique(match(as.factor(new.its2$new.ID),n_aggregated_samples2$Var1))
 n_aggregated_samples2= n_aggregated_samples2[order_col2,]
@@ -152,66 +160,87 @@ df_aggregated_samples2= data.frame(
   new.ID= rep(n_aggregated_samples2$Var1, n_aggregated_samples2$Freq),
   number_aggregated_samples= rep(n_aggregated_samples2$Freq, n_aggregated_samples2$Freq))
 
+#Add a col with the number of aggregated samples by new.ID
 new2.its2= cbind(new.its2[,1:2],n_aggregated_samples= 
                    df_aggregated_samples2$number_aggregated_samples, new.its2[,3:175])
 
-#Eliminating duplicated sites by both_its in its2
-new3.its2= subset(new2.its2, target_gene == "ITS2")
-unique(new3.its2$target_gene) #check only ITS2
+#New filter: Remove duplicated sites in both its ####
 
-sum(new2.its2$target_gene=="ITSboth") #571 both
-sum(new2.its1$target_gene=="ITSboth") #761 both
+#Remove PacBio Sequencing method because are duplicated in both its
+sum(new2.its1$sequencing_platform=="PacBio") #558
+sum(new2.its2$sequencing_platform=="PacBio") #558
 
-match(as.vector(subset(new2.its1, target_gene=="ITSboth", PermanentID)),
-as.vector(subset(new2.its2, target_gene=="ITSboth", PermanentID))) #no same permanentID
-
-##### 
-#Remove PacBio Sequencing method because are repetidead in bothITS
-sum(new2.its1$sequencing_platform=="PacBio") #467
-sum(new2.its2$sequencing_platform=="PacBio") #467
-
-new2.its1_notboth= subset(new.its1, c(paper_to_keep=="yes" & 
+#All filtering for its1
+#Remove Donald 2021 and PacBio
+new2.its1_notboth= subset(new2.its1, c(paper_to_keep=="yes" & 
                                         morrone_biogeoregions_Region=="Neotropical") &
                             paper_id != "Donald_2021_SQ" &
-                            sequencing_platform != "PacBio"
-)
-nrow(new2.its1_notboth)
-length(unique(new2.its1_notboth$new.ID))
+                            sequencing_platform != "PacBio")
 
-new2.its2_notboth= subset(new.its2, c(paper_to_keep=="yes" & 
+nrow(new2.its1_notboth) #965 samples
+length(unique(new2.its1_notboth$new.ID)) #77 sites
+
+#All filtering for its2
+#Remove litter and PacBio
+new2.its2_notboth= subset(new2.its2, c(paper_to_keep=="yes" & 
                                         morrone_biogeoregions_Region=="Neotropical") &
                             sample_type != "litter" &
-                            sequencing_platform != "PacBio"
-)
-nrow(new2.its2_notboth)
-length(unique(new2.its2_notboth$new.ID))
+                            sequencing_platform != "PacBio")
 
+nrow(new2.its2_notboth) #741 samples
+length(unique(new2.its2_notboth$new.ID)) #239 sites
+
+#All filtering for both its 
+#its1 using PacBio (duplicated for its2)
 new2.itsboth= subset(new2.its1, c(paper_to_keep=="yes" & 
                                     morrone_biogeoregions_Region=="Neotropical") &
                        paper_id != "Donald_2021_SQ" &
-                       sequencing_platform == "PacBio"
-)
-nrow(new2.itsboth)
-length(unique(new2.itsboth$new.ID))
+                       sequencing_platform == "PacBio")
 
-NET.dataset= c(rep("ITS1",nrow(new2.its1_notboth)),
+nrow(new2.itsboth) #467 samples
+length(unique(new2.itsboth$new.ID)) #385 sites
+
+#New vector of original dataset 
+NEF.dataset= c(rep("ITS1",nrow(new2.its1_notboth)),
                rep("ITS2",nrow(new2.its2_notboth)),
                rep("ITS_both",nrow(new2.itsboth)))
-length(NET.dataset) #2173
 
+length(NEF.dataset) #2173
+
+#Short dataset indicating new.ID, permanent ID, sequencing platform 
+#and new classification of target gene 
 short_its= rbind(new2.its1_notboth[,c("new.ID","PermanentID","sequencing_platform")],
                  new2.its2_notboth[,c("new.ID","PermanentID","sequencing_platform")], 
                  new2.itsboth[,c("new.ID","PermanentID","sequencing_platform")]) 
-short_its= cbind(short_its, NET.dataset)
-table(short_its$NET.dataset)
+short_its= cbind(short_its, NEF.dataset)
+table(short_its$NEF.dataset)
 
-sum(table(short_its$NET.dataset,short_its$sequencing_platform)) #2173 samples
+sum(table(short_its$NEF.dataset,short_its$sequencing_platform)) #2173 samples
 
-write.csv(short_its, file="Data/short_its.csv")
+#write.csv(short_its, file="Data/short_its.csv")
 
+# Final Global Fungi dataset #### 
+# its (no its_both), its2 (no its_both) & its_both (no its1, no its2)
+
+# Open selected variables by Mica, Soly and Melanie to keep
+var_fil= read.csv("Data/variables_filtradas.csv", sep=",")
+var_keep= subset(var_fil, to_keep=="y", x)
+var_keep= var_keep$x
+
+#Add col of number of aggregared samples (created before)
+var_keep= c(var_keep[1:4],"n_aggregated_samples", var_keep[5:length(var_keep)])
+match(var_keep, colnames(new2.its1_notboth))
+
+#new2.its2_notboth= new2.its2_notboth[,-c(1:2)] #usefulness col
+
+GF_final= rbind(new2.its1_notboth[,as.factor(var_keep)],
+      new2.its2_notboth[,as.factor(var_keep)], 
+      new2.itsboth[,as.factor(var_keep)]) 
+
+colnames(GF_final)
 #Exporting datasets
-write.csv(new2.its1, file="Data/new2.its1.csv")
-write.csv(new2.its2, file="Data/new2.its2.csv")
+#write.csv(new2.its1, file="Data/new2.its1.csv")
+#write.csv(new2.its2, file="Data/new2.its2.csv")
 
 #Add new datasets #####
 diam= read.csv("Data/French_Guiana_soil_eDNA_metabarcoding_metadata_20.09.2024.csv", sep=",")

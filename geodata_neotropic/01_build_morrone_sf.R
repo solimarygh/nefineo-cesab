@@ -84,8 +84,8 @@ cols <- c("purple", "coral3", "yellow2", "dodgerblue2", "cyan2",
           "darkgoldenrod4", "salmon1")
 
 # plot
-ggplot(nc_small) + 
-  geom_sf(aes(fill=SubDominio), colour = "grey35") +
-  scale_fill_manual(values=cols) + 
-  theme_void() 
+# ggplot(nc_small) + 
+#   geom_sf(aes(fill=SubDominio), colour = "grey35") +
+#   scale_fill_manual(values=cols) + 
+#   theme_void() 
 

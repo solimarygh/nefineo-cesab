@@ -32,33 +32,25 @@ suppressPackageStartupMessages({
 
 
 
-                 # o library(remotes)
-
-
-library(climenv)
 ####  Paths #####
 # all relative to this project!
 # 
 
-path_in_csv  <- "data/WP2_dataset.csv"
-path_nc_rds  <- "geodata_neotropic/morrone_shapefile_improved_sf.rds"   # created by 01_build_morrone_sf.R
+WP2data_in_csv  <- "data/WP2_dataset.csv"
+
+path_morrone_sf  <- "geodata_neotropic/morrone_shapefile_improved_sf.rds"   # created by 01_build_morrone_sf.R
+
 path_wwf_shp <- "geodata_neotropic/data_WWF/wwf_terr_ecos.shp"
 
-cache_morrone <- "geodata_neotropic/tmp_WP2_dataset_morrone.rds"
-cache_wwf     <- "geodata_neotropic/tmp_WP2_dataset_wwf.rds"
-cache_clim    <- "geodata_neotropic/tmp_WP2_dataset_climenv.rds"
+
+
+#cache_morrone <- "geodata_neotropic/tmp_WP2_dataset_morrone.rds"
+#cache_wwf     <- "geodata_neotropic/tmp_WP2_dataset_wwf.rds"
+#cache_clim    <- "geodata_neotropic/tmp_WP2_dataset_climenv.rds"
 
 
 
-#### Helpers ####
-check_key <- function(df, key = "new.ID_sample") {
-  cat("\n-- KEY CHECK:", deparse(substitute(df)), "--\n")
-  cat("rows:", nrow(df), " distinct(", key, "): ", dplyr::n_distinct(df[[key]]), "\n", sep="")
-  dups <- df %>% count(.data[[key]]) %>% filter(n > 1)
-  if (nrow(dups) > 0) { 
-    cat("⚠️ dups:", nrow(dups), "\n"); print(head(dups, 10)) 
-  } else cat("✅ unique\n")
-}
+
 
 ensure_distinct_by <- function(df, key = "new.ID_sample") {
   df %>% distinct(across(all_of(key)), .keep_all = TRUE)
@@ -70,18 +62,23 @@ to_num <- function(x) as.numeric(if (is.list(x)) unlist(x) else x)
 
 ##### Load base table and ensure new.ID_sample ####
 
-stopifnot(file.exists(path_in_csv))
-df0 <- read_csv(path_in_csv, show_col_types = FALSE)
+stopifnot(file.exists(WP2data_in_csv))
+df0 <- read_csv(WP2data_in_csv, show_col_types = FALSE)
+head (df0)
 
+
+#IMPORTANTE!
 ## creando um identificar por cada linea para no confundir los datos!
+#Así, cada réplica de new.ID obtiene un sufijo incremental (_1, _2, _3), y nunca se confunde con los números de fila globales.
+
 df0 <- df0 %>%
   group_by(new.ID) %>%
   mutate(fila = row_number()) %>%
   ungroup() %>%
   mutate(new.ID_sample = paste0(new.ID, "_", fila))
-#Así, cada réplica de new.ID obtiene un sufijo incremental (_1, _2, _3), y nunca se confunde con los números de fila globales.
 
-check_key(df0, "new.ID_sample")
+
+
 
 stopifnot(all(c("longitude","latitude") %in% names(df0)))
 
@@ -94,29 +91,33 @@ df0 %>% filter(new.ID_sample == "NEF_AtlasMXB_B89_2025_1") %>% nrow() > 0
 
 #### 1) MORRONE (point-in-polygon) + manual fixes (by new.ID) ####
 
-stopifnot(file.exists(path_nc_rds))
-nc_small <- readRDS(path_nc_rds)
+stopifnot(file.exists(path_morrone_sf))
+nc_small <- readRDS(path_morrone_sf)
 
 # Intersections (planar)
-pts_sf <- st_as_sf(df0, coords = c("longitude","latitude"), crs = 4326)
-nc_pl  <- st_transform(nc_small, 2163) # Its non-deprecated replacement EPSG:9311 will be used instead. 
-pts_pl <- st_transform(pts_sf,    2163) # Its non-deprecated replacement EPSG:9311 will be used instead. 
+pontos_sf <- st_as_sf(df0, coords = c("longitude","latitude"), crs = 4326)
+morrone_plano  <- st_transform(nc_small, 2163) # Its non-deprecated replacement EPSG:9311 will be used instead. 
+pontos_plano <- st_transform(pontos_sf,    2163) # Its non-deprecated replacement EPSG:9311 will be used instead. 
 
 if (!file.exists(cache_morrone)) {
   message("• Morrone intersections...")
-  idx_list <- lapply(seq_len(nrow(pts_pl)), function(i) which(st_intersects(pts_pl[i,], nc_pl, sparse = FALSE)))
+  idx_list <- lapply(seq_len(nrow(pontos_plano)), function(i) which(st_intersects(pontos_plano[i,], morrone_plano, sparse = FALSE)))
   morrone_df <- purrr::imap_dfr(idx_list, function(ix, i) {
     if (length(ix) > 0) {
-      cbind(data.frame(new.ID_sample = df0$new.ID_sample[i]), st_drop_geometry(nc_pl[ix,]))
+      cbind(data.frame(new.ID_sample = df0$new.ID_sample[i]), st_drop_geometry(morrone_plano[ix,]))
     } else {
-      empty_row <- as.list(rep(NA, ncol(nc_pl))); names(empty_row) <- colnames(nc_pl)
+      empty_row <- as.list(rep(NA, ncol(morrone_plano))); names(empty_row) <- colnames(morrone_plano)
       data.frame(new.ID_sample = df0$new.ID_sample[i], as.data.frame(empty_row))
     }
   })
-  saveRDS(morrone_df, cache_morrone)
+  saveRDS(morrone_df, "geodata_neotropic/tmp_WP2_dataset_morrone.rds")
+  morrone_df <- readRDS("geodata_neotropic/tmp_WP2_dataset_morrone.rds")
 } else {
   morrone_df <- readRDS(cache_morrone)
 }
+
+
+
 
 # Keep only relevant columns and prefix as morrone_biogeoregions_
 morro_tmp <- morrone_df %>%

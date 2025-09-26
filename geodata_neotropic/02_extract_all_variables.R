@@ -48,7 +48,7 @@ cache_morrone <- "geodata_neotropic/tmp_WP2_dataset_morrone.rds"
 cache_wwf     <- "geodata_neotropic/tmp_WP2_dataset_wwf.rds"
 cache_clim    <- "geodata_neotropic/tmp_WP2_dataset_climenv.rds"
 
-out_csv <- "geodata_neotropic/WP2_dataset_allvars.csv"
+
 
 #### Helpers ####
 check_key <- function(df, key = "new.ID_sample") {
@@ -625,14 +625,32 @@ class_A      <- holdridge_class(per_A, tap_A)
 
 holdridge_A <- tibble(
   new.ID_sample = out3$new.ID_sample,
-  method        = "thornthwaite",
+  method_Holdrige        = "thornthwaite",
   PET_annual    = petA_annual,
   TAP_annual    = tap_A,
   PER           = per_A,
-  Holdridge     = class_A
+  Holdridge_class     = class_A
 )
 
-out4<-holdridge_A
+
+out4 <- out3 %>%
+  left_join(holdridge_A, by = "new.ID_sample") %>%
+  select (-wwf_ecoregions_geometry) #tirando esa geometria
+
+
+#Sanity checks
+stopifnot(nrow(out4) == dplyr::n_distinct(out4$new.ID_sample))  # 3925! ok!!
+# Optional: ensure we didn’t create new NAs for these key fields
+# print(colSums(is.na(out4[c("climenv_holdridge_class","climenv_pet_th_ann","climenv_tap_ann","climenv_per")])))
+
+
+
 ##### Save final output #####
-write_csv(out4, out_csv)
+write_csv(out4,  "geodata_neotropic/WP2_dataset_allvars.csv")
+colnames (out4)
+
+saveRDS(out4, "geodata_neotropic/WP2_dataset_allvars.rds", compress = "xz")  # menor tamaño; más lento que "gzip"
 message("✅ Done. Saved: ", out_csv)
+
+
+### testando outro formato para salvar 

@@ -43,10 +43,10 @@ path_morrone_sf  <- "geodata_neotropic/morrone_shapefile_improved_sf.rds"   # cr
 path_wwf_shp <- "geodata_neotropic/data_WWF/wwf_terr_ecos.shp"
 
 
-
-#cache_morrone <- "geodata_neotropic/tmp_WP2_dataset_morrone.rds"
-#cache_wwf     <- "geodata_neotropic/tmp_WP2_dataset_wwf.rds"
-#cache_clim    <- "geodata_neotropic/tmp_WP2_dataset_climenv.rds"
+#se nao temos estes dados eles sao criados
+#cache_morrone:"geodata_neotropic/tmp_WP2_dataset_morrone.rds"
+#cache_wwf: "geodata_neotropic/tmp_WP2_dataset_wwf.rds"
+#"geodata_neotropic/tmp_WP2_dataset_climenv.rds" : "geodata_neotropic/tmp_WP2_dataset_climenv.rds"
 
 
 
@@ -99,7 +99,7 @@ pontos_sf <- st_as_sf(df0, coords = c("longitude","latitude"), crs = 4326)
 morrone_plano  <- st_transform(nc_small, 2163) # Its non-deprecated replacement EPSG:9311 will be used instead. 
 pontos_plano <- st_transform(pontos_sf,    2163) # Its non-deprecated replacement EPSG:9311 will be used instead. 
 
-if (!file.exists(cache_morrone)) {
+if (!file.exists("geodata_neotropic/tmp_WP2_dataset_morrone.rds")) {
   message("• Morrone intersections...")
   idx_list <- lapply(seq_len(nrow(pontos_plano)), function(i) which(st_intersects(pontos_plano[i,], morrone_plano, sparse = FALSE)))
   morrone_df <- purrr::imap_dfr(idx_list, function(ix, i) {
@@ -113,7 +113,7 @@ if (!file.exists(cache_morrone)) {
   saveRDS(morrone_df, "geodata_neotropic/tmp_WP2_dataset_morrone.rds")
   morrone_df <- readRDS("geodata_neotropic/tmp_WP2_dataset_morrone.rds")
 } else {
-  morrone_df <- readRDS(cache_morrone)
+  morrone_df <- readRDS("geodata_neotropic/tmp_WP2_dataset_morrone.rds")
 }
 
 
@@ -314,9 +314,10 @@ if (!file.exists(cache_wwf)) {
       data.frame(new.ID_sample = out1_complete$new.ID_sample[i], as.data.frame(empty_row))
     }
   })
-  saveRDS(wwf_df, cache_wwf)
+  saveRDS(wwf_df, "geodata_neotropic/tmp_WP2_dataset_wwf.rds")
+  wwf_df <- readRDS("geodata_neotropic/tmp_WP2_dataset_wwf.rds")
 } else {
-  wwf_df <- readRDS(cache_wwf)
+  wwf_df <- readRDS("geodata_neotropic/tmp_WP2_dataset_wwf.rds")
 }
 
 wwf_tmp <- wwf_df %>% st_drop_geometry() %>%
@@ -502,16 +503,17 @@ if (!dir.exists(out_dir)) dir.create(out_dir, recursive = TRUE)
   }
   
   # --- Extract (or load from cache) ---
-  if (!file.exists(cache_clim)) {
+  if (!file.exists("geodata_neotropic/tmp_WP2_dataset_climenv.rds")) {
     message("• Extracting climenv...")
     WP2_clim <- climenv::ce_extract(
       path       = out_dir,
       location   = out2_sf,
       location_g = "new.ID_sample" # group id
     )
-    saveRDS(WP2_clim, cache_clim)
+    saveRDS(WP2_clim, "geodata_neotropic/tmp_WP2_dataset_climenv.rds")
+    WP2_clim <- readRDS("geodata_neotropic/tmp_WP2_dataset_climenv.rds")
   } else {
-    WP2_clim <- readRDS(cache_clim)
+    WP2_clim <- readRDS("geodata_neotropic/tmp_WP2_dataset_climenv.rds")
   }
  
   # --- Monthly tables (exclude *_sd, elev, lat, Readme) ---
@@ -655,3 +657,4 @@ message("✅ Done. Saved: ", out_csv)
 
 
 ### testando outro formato para salvar 
+

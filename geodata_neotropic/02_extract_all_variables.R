@@ -303,7 +303,7 @@ wwfSA_pl <- st_transform(wwfSA, 2163)
 o1_sf    <- st_as_sf(out1_complete, coords = c("longitude","latitude"), crs = 4326)
 o1_pl    <- st_transform(o1_sf, 2163)
 
-if (!file.exists(cache_wwf)) {
+if (!file.exists("geodata_neotropic/tmp_WP2_dataset_wwf.rds")) {
   message("WWF intersections...")
   idx_list <- lapply(seq_len(nrow(o1_pl)), function(i) which(st_intersects(o1_pl[i,], wwfSA_pl, sparse = FALSE)))
   wwf_df <- purrr::imap_dfr(idx_list, function(ix, i) {
@@ -643,7 +643,7 @@ out4 <- out3 %>%
 
 #Sanity checks
 stopifnot(nrow(out4) == dplyr::n_distinct(out4$new.ID_sample))  # 3925! ok!!
-# Optional: ensure we didn’t create new NAs for these key fields
+# Optional: ensure we didn’t create new NAs for these key fieldscol
 # print(colSums(is.na(out4[c("climenv_holdridge_class","climenv_pet_th_ann","climenv_tap_ann","climenv_per")])))
 
 
@@ -653,8 +653,10 @@ write_csv(out4,  "geodata_neotropic/WP2_dataset_allvars.csv")
 colnames (out4)
 
 saveRDS(out4, "geodata_neotropic/WP2_dataset_allvars.rds", compress = "xz")  # menor tamaño; más lento que "gzip"
-message("✅ Done. Saved: ", out_csv)
+#message("✅ Done. Saved: ", out_csv)
 
 
 ### testando outro formato para salvar 
+
+colnames(out4)
 

@@ -1,0 +1,167 @@
+---
+title: "Soil, Biogeography, and Climate Variable Extraction for WP2 (NEFINEO)"
+author: "Solimary"
+output:
+  word_document:
+    reference_docx: _estilos.docx
+  html_document:
+    toc: true
+    df_print: default
+    mathjax: default
+bibliography: references_wp2_nefineo.bib
+link-citations: true
+---
+
+# Methods
+
+## Methods (concise)
+
+We compiled georeferenced ITS1/ITS2 sampling records (WGS84) and restricted analyses to the Neotropics (records flagged `paper_to_keep == "yes"`). To avoid redundant downloads, nearby sites were clustered using geodesic (Haversine) distances and complete-linkage hierarchical clustering with a 150-km cut; group centroids defined SoilGrids request windows (details in Supplementary Methods).
+
+**Soils.** We retrieved 0–5 cm layers from SoilGrids (WCS, EPSG:4326)—nitrogen, sand, CEC (pH 7), SOC, pH(H₂O), and silt—and extracted point values for each site [@Hengl2017SoilGrids]. SoilGrids empty cells reported as 0 were treated as missing.
+
+**Biogeography.** Sites were assigned to (i) Morrone provinces via planar point-in-polygon in EPSG:2163 [@Morrone2014Neotropical] and (ii) WWF Terrestrial Ecoregions, cropped to the Neotropics [@Olson2001Ecoregions]. When intersections returned NA, documented one-to-one manual mappings completed the assignment (Tables S1–S2).
+
+**Climate and Holdridge.** Monthly and annual climate variables were obtained with `climenv` and extracted per site [@climenv]. Potential evapotranspiration (PET) was computed with the Thornthwaite method from monthly temperature and latitude, total annual precipitation (TAP) was summed from monthly precipitation, and the aridity index was PER = PET/TAP [@Thornthwaite1948; @VicenteSerrano2010SPEI]. Holdridge life-zones were assigned from PER and TAP.
+
+**Quality control & outputs.** We enforced one row per `new.ID_sample`, harmonized types/prefixes, and removed geometries before export. The integrated dataset is provided as CSV and RDS; the full pipeline (parameters, CRS choices, and clustering rationale) is summarized in Fig. S1 and fully detailed in Supplementary Methods, with all manual mappings in Tables S1–S2.
+
+**Software.** Processing used R (≥4.x) with `sf`, `raster`, `geosphere`, and tidyverse packages for geospatial operations and data handling [@sf; @raster; @geosphere; @dplyr; @readr; @stringr; @purrr; @tibble].
+
+
+
+## Input data and spatial scope
+We assembled sampling points from ITS1 and ITS2 datasets, each record identified by `new.ID` and geographic coordinates (`latitude`, `longitude`) in WGS84 (EPSG:4326). To ensure replica uniqueness within sites, we created `new.ID_sample` by concatenating `new.ID` with a per-row suffix. Analyses were restricted to the **Neotropics**; we retained records with `paper_to_keep == "yes"` and excluded the out-of-scope point (“NEF_AtlasMXB_B89_2025_1”).
+
+## Spatial grouping of sites (for SoilGrids downloads)
+Because many sites lie in close proximity, we aggregated points to minimize redundant SoilGrids requests. We computed geodesic (Haversine) distances (`geosphere` [@geosphere]), performed **hierarchical clustering** with complete linkage (`hclust`), and cut the dendrogram at **150 km** (`cutree(h = 150000)`), assigning each site to a group. For each group, we used the **centroid (mean latitude/longitude)** as the center of the download window.
+
+## Soil properties from SoilGrids (WCS)
+Soil variables were retrieved from **SoilGrids** via **WCS 2.0.1** in **EPSG:4326** [@Hengl2017SoilGrids]. For each group we downloaded a **\(2^\circ \times 2^\circ\)** window (\(\pm 1^\circ\) lat/lon) as GeoTIFF. All layers refer to the surface horizon **0–5 cm (mean)**:
+- **Nitrogen:** `nitrogen_0-5cm_mean`  
+- **Sand:** `sand_0-5cm_mean`  
+- **Cation exchange capacity (CEC, at pH 7):** `cec_0-5cm_mean`  
+- **Soil organic carbon (SOC):** `soc_0-5cm_mean`  
+- **pH (H$_2$O):** `phh2o_0-5cm_mean`  
+- **Silt:** `silt_0-5cm_mean`
+
+Requests specified `SUBSETTINGCRS` and `OUTPUTCRS` as 4326. **Empty cells** returned by SoilGrids as **0** were treated as **missing (NA)** during extraction and QC.
+
+## Point extraction of soil properties
+For each site, we opened the GeoTIFF corresponding to its **group** and extracted the point value at site coordinates using `raster::extract` (`raster` [@raster]), with `SpatialPoints` in WGS84. The resulting vectors were appended to the site table as `nitrogen`, `sand`, `cec`, `soc`, `phh2o`, and `silt`.
+
+## Biogeographic assignment: Morrone provinces
+We converted points to `sf` (`sf` [@sf]) and performed **planar** point-in-polygon intersections in **EPSG:2163** (polygons and points transformed to 2163). The join returned, per site, `IDProv`, `Region`, `Subregion`, `Provincias`, `Dominio`, and `SubDominio` (prefixed `morrone_biogeoregions_*`). Where the intersection yielded NA, we applied **documented manual fixes** (pairs `new.ID_sample` → `IDProv`), then expanded metadata via a **1:1 lookup** from the official shapefile. Manual values **only** replaced NA from the automatic intersection. We enforced uniqueness by `new.ID_sample` and normalized names/prefixes. The Morrone framework follows @Morrone2014Neotropical.
+
+## Biogeographic assignment: WWF ecoregions
+We read the **WWF Terrestrial Ecoregions** shapefile and **cropped** it to the Neotropical extent following @Olson2001Ecoregions. We repeated planar point-in-polygon intersections in **EPSG:2163**. The attribute table (without geometry) was prefixed as `wwf_ecoregions_*`. To harmonize multipart features and attributes, we built a **1:1 lookup by `ECO_ID`** (ignoring geometric metrics such as `AREA`/`PERIMETER`) and applied a list of **manual fixes** (pairs `new.ID_sample` → `ECO_ID`) that **coalesced over NA** from the automatic intersection, with type harmonization where needed.
+
+## Climate variables (climenv) and aggregations
+We downloaded/updated climate grids with `climenv::ce_download()` and executed `climenv::ce_extract()` grouping by `new.ID_sample` [@climenv]. From the returned object, we derived:
+- **Monthly series** (12 columns per variable; prefix `climenv_monthavg_*`), and  
+- **Annual means** per site (prefix `climenv_annavg_*`).  
+Scalar variables (e.g., `elev`, `lat`) retained the prefix `climenv_*`. We left-joined these back to the main table by `new.ID_sample`, ensuring **one row per sample**. Data handling used `dplyr`, `readr`, `stringr`, `purrr`, and `tibble` [@dplyr; @readr; @stringr; @purrr; @tibble].
+
+## Holdridge life-zones
+We computed monthly **potential evapotranspiration (PET)** using **Thornthwaite** [@Thornthwaite1948] via `SPEI::thornthwaite` [@SPEI] from monthly mean temperature (`climenv_monthavg_tavg_m_*`) and site latitude.  
+- **TAP** (total annual precipitation) = sum of monthly `prec`.  
+- **Annual PET** = sum of monthly PET.  
+- **Aridity index** `PER = PET / TAP`.  
+We assigned **Holdridge class** via a deterministic function that intersects standard discretizations of `PER` and `TAP` (deserts to rain forests; tundras to wet forests). Results were stored as `Holdridge_class` together with `PET_annual`, `TAP_annual`, `PER`, and the method label (`method_Holdrige = "thornthwaite"`). For drought/aridity context, see @VicenteSerrano2010SPEI.
+
+## Quality control and consistency
+- **Missing values:** SoilGrids zeros were treated as NA; we listed samples with missing soil variables for potential re-processing.  
+- **Uniqueness:** after each stage, we enforced **one row per `new.ID_sample`** (`nrow == n_distinct(new.ID_sample)`).  
+- **Typing and prefixes:** coalescence only over NA; factor-to-character casting when needed; consistent prefixes (`morrone_biogeoregions_*`, `wwf_ecoregions_*`, `climenv_monthavg_*`, `climenv_annavg_*`, `climenv_*`).  
+- **Geometries:** `sf` geometry columns were dropped from final rectangular outputs.
+
+## Outputs and caching
+The final integrated dataset was saved as **CSV** (`WP2_dataset_allvars.csv`) and compressed **RDS** (`WP2_dataset_allvars.rds`). Intermediate caches accelerated re-runs:  
+`tmp_WP2_dataset_morrone.rds`, `tmp_WP2_dataset_wwf.rds`, `tmp_WP2_dataset_climenv.rds`.
+
+## Software and reproducibility
+All analyses were performed in **R** (≥ 4.x) [@R-base]. Key packages: `geosphere`, `stats`, `raster`, `sf`, `dplyr`, `readr`, `stringr`, `purrr`, `tibble`, `climenv`, `SPEI`; optional diagnostics with `leaflet` and `RColorBrewer` [@geosphere; @raster; @sf; @dplyr; @readr; @stringr; @purrr; @tibble; @climenv; @SPEI; @leaflet; @RColorBrewer]. Planar operations used **EPSG:2163**; source coordinates used **EPSG:4326**. Project-relative paths support reproduction with minimal local adjustments (e.g., local download directories for SoilGrids and `climenv`).
+
+---
+
+# Supplementary Material
+
+## Table S1. Manual mappings for **Morrone** (pairs `new.ID_sample` → `IDProv`)
+> Applied **only** when the automatic point–polygon intersection returns NA. Metadata (Region, Subregion, Provincia, Dominio, SubDominio) are expanded via a **1:1 lookup** from the official shapefile [@Morrone2014Neotropical].
+
+| new.ID_sample                 | morrone_biogeoregions_IDProv |
+|------------------------------|-------------------------------|
+| NEF_GloFung-its2_76_2022_1   | 46 |
+| NEF_GloFung-its2_77_2022_1   | 46 |
+| NEF_GloFung-its2_89_2022_1   | 25 |
+| NEF_GloFung-its2_89_2022_2   | 25 |
+| NEF_GloFung-its2_710_2016_1  | 12 |
+| NEF_GloFung-its1_183_2021_1  | 23 |
+| NEF_GloFung-its1_183_2021_2  | 23 |
+| NEF_GloFung-its1_200_2021_1  | 19 |
+| NEF_GloFung-its1_237_2021_1  | 11 |
+| NEF_GloFung-its1_327_2021_1  | 17 |
+| NEF_GloFung-its1_388_2021_1  | 11 |
+| NEF_GloFung-its1_389_2021_1  | 11 |
+| NEF_GloFung-its1_394_2021_1  | 12 |
+| NEF_GloFung-its1_396_2021_1  | 12 |
+| NEF_GloFung-its1_426_2021_1  | 8  |
+| NEF_GloFung-its1_432_2021_1  | 8  |
+| NEF_GloFung-its1_443_2021_1  | 22 |
+| NEF_GloFung-its1_482_2021_1  | 22 |
+| NEF_diam_MRA_2025_1          | 30 |
+| NEF_SPUNBR_SPUN77_2025_1     | 46 |
+| NEF_SPUNBR_SPUN78_2025_1     | 46 |
+| NEF_SPUNBR_SPUN79_2025_1     | 46 |
+| NEF_SPUNBR_SPUN84_2025_1     | 46 |
+| NEF_SPUNBR_SPUN14_2025_1     | 46 |
+| NEF_SPUNBR_SPUN61_2025_1     | 46 |
+
+**Key:** `IDProv` is the province identifier in the official Morrone shapefile.
+
+## Table S2. Manual mappings for **WWF Ecoregions** (pairs `new.ID_sample` → `ECO_ID`)
+> Applied **only** when the automatic intersection returns NA. Ecoregion metadata (ECO_NAME, BIOME, REALM, etc.) are expanded via a **1:1 lookup** from `ECO_ID` [@Olson2001Ecoregions].
+
+| new.ID_sample                 | wwf_ecoregions_ECO_ID |
+|------------------------------|------------------------|
+| NEF_GloFung-its2_89_2022_1   | 61407 |
+| NEF_GloFung-its2_89_2022_2   | 61407 |
+| NEF_GloFung-its2_710_2016_1  | 60226 |
+| NEF_GloFung-its1_183_2021_1  | 60129 |
+| NEF_GloFung-its1_183_2021_2  | 60129 |
+| NEF_GloFung-its1_200_2021_1  | 61405 |
+| NEF_GloFung-its1_237_2021_1  | 61305 |
+| NEF_GloFung-its1_327_2021_1  | 60181 |
+| NEF_GloFung-its1_330_2021_1  | 60181 |
+| NEF_GloFung-its1_388_2021_1  | 61305 |
+| NEF_GloFung-its1_389_2021_1  | 60179 |
+| NEF_GloFung-its1_394_2021_1  | 61305 |
+| NEF_GloFung-its1_396_2021_1  | 61305 |
+| NEF_GloFung-its1_402_2021_1  | 61402 |
+| NEF_GloFung-its1_426_2021_1  | 60213 |
+| NEF_GloFung-its1_432_2021_1  | 61402 |
+| NEF_GloFung-its1_443_2021_1  | 61308 |
+| NEF_GloFung-its1_482_2021_1  | 61308 |
+| NEF_diam_MRA_2025_1          | 61401 |
+| NEF_SPUNBR_SPUN78_2025_1     | 60160 |
+| NEF_SPUNBR_SPUN79_2025_1     | 60160 |
+
+**Key:** `ECO_ID` is the unique WWF ecoregion identifier.
+
+## Figure S1. Pipeline flow diagram (Mermaid)
+
+```mermaid
+flowchart TD
+  A[Input data\nITS1/ITS2 (new.ID, lat, lon)] --> B[Replica uniqueness\nnew.ID_sample]
+  B --> C[Neotropics filter\npaper_to_keep == "yes"]
+  C --> D[Spatial clustering (Haversine)\ncomplete linkage; 150 km cut]
+  D --> E[Group-wise SoilGrids download\nWCS 2.0.1; 2°×2°; 0–5 cm]
+  E --> F[Per-site point extraction\nN, sand, CEC, SOC, pH, silt]
+  F --> G[Morrone (sf 2163)\npoint-in-polygon]
+  G --> G2[Manual Morrone fixes\ncoalesce over NA]
+  G2 --> H[WWF ecoregions (Neotropics crop)\nintersection in 2163]
+  H --> H2[Manual WWF fixes\n1:1 ECO_ID lookup]
+  H2 --> I[climenv: download & extract\nmonthly and annual]
+  I --> J[PET (Thornthwaite), TAP, PER\nHoldridge_class]
+  J --> K[QC & consistency\n1 row per new.ID_sample]
+  K --> L[Outputs\nWP2_dataset_allvars.csv / .rds]

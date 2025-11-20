@@ -34,9 +34,7 @@ suppressPackageStartupMessages({
 
 ####  Paths #####
 # all relative to this project!
-# 
 
-WP2data_in_csv  <- "data/WP2_dataset.csv"
 
 path_morrone_sf  <- "geodata_neotropic/morrone_shapefile_improved_sf.rds"   # created by 01_build_morrone_sf.R
 
@@ -49,9 +47,6 @@ path_wwf_shp <- "geodata_neotropic/data_WWF/wwf_terr_ecos.shp"
 #"geodata_neotropic/tmp_WP2_dataset_climenv.rds" : "geodata_neotropic/tmp_WP2_dataset_climenv.rds"
 
 
-
-
-
 ensure_distinct_by <- function(df, key = "new.ID_sample") {
   df %>% distinct(across(all_of(key)), .keep_all = TRUE)
 }
@@ -62,8 +57,32 @@ to_num <- function(x) as.numeric(if (is.list(x)) unlist(x) else x)
 
 ##### Load base table and ensure new.ID_sample ####
 
-stopifnot(file.exists(WP2data_in_csv))
-df0 <- read_csv(WP2data_in_csv, show_col_types = FALSE)
+# 1) Paths dos arquivos
+WP2data_in_csv_original  <- "data/WP2_dataset.csv"
+WP2data_in_csv_missing   <- "Data/WP2_diamond_missing_soil.csv"
+
+# 2) Ler os dados
+df_original <- read_csv(WP2data_in_csv_original, show_col_types = FALSE)
+df_missing  <- read_csv(WP2data_in_csv_missing,  show_col_types = FALSE)
+
+# 3) Harmonizar nomes de colunas em df_missing
+df_missing <- df_missing %>%
+  rename(
+    latitude  = Latitude,
+    longitude = Longitude
+  )
+
+# (opcional) checar se tem conflito de IDs
+ #intersect(df_original$new.ID, df_missing$new.ID)
+
+# 4) Combinar as linhas dos dois data frames
+df0 <- bind_rows(df_original, df_missing)
+
+# Checagens rápidas
+nrow(df_original) #3926
+nrow(df_missing) # 32
+nrow(df0)  # deve ser a soma das duas # 3957
+
 head (df0)
 
 
@@ -76,8 +95,6 @@ df0 <- df0 %>%
   mutate(fila = row_number()) %>%
   ungroup() %>%
   mutate(new.ID_sample = paste0(new.ID, "_", fila))
-
-
 
 
 stopifnot(all(c("longitude","latitude") %in% names(df0)))
@@ -99,7 +116,9 @@ pontos_sf <- st_as_sf(df0, coords = c("longitude","latitude"), crs = 4326)
 morrone_plano  <- st_transform(nc_small, 2163) # Its non-deprecated replacement EPSG:9311 will be used instead. 
 pontos_plano <- st_transform(pontos_sf,    2163) # Its non-deprecated replacement EPSG:9311 will be used instead. 
 
-if (!file.exists("geodata_neotropic/tmp_WP2_dataset_morrone.rds")) {
+
+#descomentar se no querem extrair novamente
+#if (!file.exists("geodata_neotropic#/tmp_WP2_dataset_morrone.rds")) {
   message("• Morrone intersections...")
   idx_list <- lapply(seq_len(nrow(pontos_plano)), function(i) which(st_intersects(pontos_plano[i,], morrone_plano, sparse = FALSE)))
   morrone_df <- purrr::imap_dfr(idx_list, function(ix, i) {
@@ -112,9 +131,9 @@ if (!file.exists("geodata_neotropic/tmp_WP2_dataset_morrone.rds")) {
   })
   saveRDS(morrone_df, "geodata_neotropic/tmp_WP2_dataset_morrone.rds")
   morrone_df <- readRDS("geodata_neotropic/tmp_WP2_dataset_morrone.rds")
-} else {
-  morrone_df <- readRDS("geodata_neotropic/tmp_WP2_dataset_morrone.rds")
-}
+# } else {
+#   morrone_df <- readRDS("geodata_neotropic/tmp_WP2_dataset_morrone.rds")
+# }
 
 
 
@@ -157,36 +176,38 @@ morrone_lookup <- nc_small %>%
 
 
 #####  (Optional) Morrone leaflet diagnostic map 
-#  
-# # Uncomment to visualize points that still lack Morrone province
-# faltantes_morrone <- out1_clean  %>% filter(is.na(morrone_biogeoregions_IDProv))
-# library(leaflet); library(RColorBrewer)
-# id_levels <- sort(unique(nc_small$IDProv))
-# pal_morr  <- colorFactor(palette = colorRampPalette(brewer.pal(12,"Set3"))(length(id_levels)),
-#                          domain = id_levels)
-# nc_labels <- nc_small %>% st_make_valid() %>% st_point_on_surface() %>%
-#   mutate(IDProv_chr = as.character(IDProv))
-# leaflet(options = leafletOptions(minZoom = 2)) %>%
-#   addMapPane("labels", zIndex = 430) %>%
-#   addProviderTiles("CartoDB.Positron") %>%
-#   addPolygons(data = nc_small, fillColor = ~pal_morr(IDProv), fillOpacity = 0.6,
-#               color = "grey35", weight = 1,
-#               popup = ~paste0("<b>SubDominio:</b> ", SubDominio,
-#                               "<br><b>Dominio:</b> ", Dominio,
-#                               "<br><b>IDProv:</b> ", IDProv)) %>%
-#   addLabelOnlyMarkers(data = nc_labels, label = ~IDProv_chr,
-#                       labelOptions = labelOptions(noHide = TRUE, direction = "center",
-#                                                   textOnly = TRUE, textsize = "12px",
-#                                                   style = list("font-weight"="bold",
-#                                                                "color"="black",
-#                                                                "text-shadow"="0 0 3px #FFFFFF, 0 0 6px #FFFFFF")),
-#                       options = pathOptions(pane = "labels")) %>%
-#   addCircleMarkers(data = faltantes_morrone, lng = ~longitude, lat = ~latitude,
-#                    radius = 4, color = "black", fillColor = "white", fillOpacity = 0.95,
-#                    stroke = TRUE, weight = 1,
-#                    popup = ~paste0("<b>ID:</b> ", new.ID, "<br><b>Project.Source:</b> ", Project.Source)) %>%
-#   addLegend("bottomright", pal = pal_morr, values = nc_small$IDProv,
-#             title = "Morrone IDProv", opacity = 0.7)
+  
+# Uncomment to visualize points that still lack Morrone province
+ faltantes_morrone <- out1_clean  %>% filter(is.na(morrone_biogeoregions_IDProv))
+ 
+ 
+library(leaflet); library(RColorBrewer)
+id_levels <- sort(unique(nc_small$IDProv))
+pal_morr  <- colorFactor(palette = colorRampPalette(brewer.pal(12,"Set3"))(length(id_levels)),
+                         domain = id_levels)
+nc_labels <- nc_small %>% st_make_valid() %>% st_point_on_surface() %>%
+  mutate(IDProv_chr = as.character(IDProv))
+leaflet(options = leafletOptions(minZoom = 2)) %>%
+  addMapPane("labels", zIndex = 430) %>%
+  addProviderTiles("CartoDB.Positron") %>%
+  addPolygons(data = nc_small, fillColor = ~pal_morr(IDProv), fillOpacity = 0.6,
+              color = "grey35", weight = 1,
+              popup = ~paste0("<b>SubDominio:</b> ", SubDominio,
+                              "<br><b>Dominio:</b> ", Dominio,
+                              "<br><b>IDProv:</b> ", IDProv)) %>%
+  addLabelOnlyMarkers(data = nc_labels, label = ~IDProv_chr,
+                      labelOptions = labelOptions(noHide = TRUE, direction = "center",
+                                                  textOnly = TRUE, textsize = "12px",
+                                                  style = list("font-weight"="bold",
+                                                               "color"="black",
+                                                               "text-shadow"="0 0 3px #FFFFFF, 0 0 6px #FFFFFF")),
+                      options = pathOptions(pane = "labels")) %>%
+  addCircleMarkers(data = faltantes_morrone, lng = ~longitude, lat = ~latitude,
+                   radius = 4, color = "black", fillColor = "white", fillOpacity = 0.95,
+                   stroke = TRUE, weight = 1,
+                   popup = ~paste0("<b>ID:</b> ", new.ID, "<br><b>Project.Source:</b> ", Project.Source)) %>%
+  addLegend("bottomright", pal = pal_morr, values = nc_small$IDProv,
+            title = "Morrone IDProv", opacity = 0.7)
 
 
 
@@ -303,7 +324,9 @@ wwfSA_pl <- st_transform(wwfSA, 2163)
 o1_sf    <- st_as_sf(out1_complete, coords = c("longitude","latitude"), crs = 4326)
 o1_pl    <- st_transform(o1_sf, 2163)
 
-if (!file.exists("geodata_neotropic/tmp_WP2_dataset_wwf.rds")) {
+
+#Descomentar se no quieren extrair de novo
+# if (!file.exists("geodata_neotropic/tmp_WP2_dataset_wwf.rds")) {
   message("WWF intersections...")
   idx_list <- lapply(seq_len(nrow(o1_pl)), function(i) which(st_intersects(o1_pl[i,], wwfSA_pl, sparse = FALSE)))
   wwf_df <- purrr::imap_dfr(idx_list, function(ix, i) {
@@ -316,9 +339,9 @@ if (!file.exists("geodata_neotropic/tmp_WP2_dataset_wwf.rds")) {
   })
   saveRDS(wwf_df, "geodata_neotropic/tmp_WP2_dataset_wwf.rds")
   wwf_df <- readRDS("geodata_neotropic/tmp_WP2_dataset_wwf.rds")
-} else {
-  wwf_df <- readRDS("geodata_neotropic/tmp_WP2_dataset_wwf.rds")
-}
+# } else {
+#   wwf_df <- readRDS("geodata_neotropic/tmp_WP2_dataset_wwf.rds")
+# }
 
 wwf_tmp <- wwf_df %>% st_drop_geometry() %>%
   rename_with(~ paste0("wwf_ecoregions_", .x), -new.ID_sample)
@@ -333,7 +356,10 @@ summary_counts <- tibble(
 
 print(summary_counts)
 
-
+# dataset       n_rows n_unique_ids
+# <chr>          <int>        <int>
+#   1 out1_complete   3957         3957
+# 2 wwf_df          3925         3925
 
 
 out2 <- out1_complete %>% left_join(ensure_distinct_by(wwf_tmp), by = "new.ID_sample")
@@ -503,7 +529,9 @@ if (!dir.exists(out_dir)) dir.create(out_dir, recursive = TRUE)
   }
   
   # --- Extract (or load from cache) ---
-  if (!file.exists("geodata_neotropic/tmp_WP2_dataset_climenv.rds")) {
+  # 
+  # Se no quieren extraer, decomentar o if
+  # if (!file.exists("geodata_neotropic/tmp_WP2_dataset_climenv.rds")) {
     message("• Extracting climenv...")
     WP2_clim <- climenv::ce_extract(
       path       = out_dir,
@@ -512,10 +540,10 @@ if (!dir.exists(out_dir)) dir.create(out_dir, recursive = TRUE)
     )
     saveRDS(WP2_clim, "geodata_neotropic/tmp_WP2_dataset_climenv.rds")
     WP2_clim <- readRDS("geodata_neotropic/tmp_WP2_dataset_climenv.rds")
-  } else {
-    WP2_clim <- readRDS("geodata_neotropic/tmp_WP2_dataset_climenv.rds")
-  }
- 
+  # } else {
+  #   WP2_clim <- readRDS("geodata_neotropic/tmp_WP2_dataset_climenv.rds")
+  # }
+  # 
   # --- Monthly tables (exclude *_sd, elev, lat, Readme) ---
   keep_monthly <- names(WP2_clim)[!grepl("elev|lat|Readme|_sd", names(WP2_clim))]
   tmp1 <- map(keep_monthly, function(nm) {
@@ -642,7 +670,7 @@ out4 <- out3 %>%
 
 
 #Sanity checks
-stopifnot(nrow(out4) == dplyr::n_distinct(out4$new.ID_sample))  # 3925! ok!!
+stopifnot(nrow(out4) == dplyr::n_distinct(out4$new.ID_sample))  # 3957! ok!!
 # Optional: ensure we didn’t create new NAs for these key fieldscol
 # print(colSums(is.na(out4[c("climenv_holdridge_class","climenv_pet_th_ann","climenv_tap_ann","climenv_per")])))
 
@@ -655,7 +683,7 @@ colnames (out4)
 saveRDS(out4, "geodata_neotropic/WP2_dataset_allvars.rds", compress = "xz")  # menor tamaño; más lento que "gzip"
 #message("✅ Done. Saved: ", out_csv)
 
-
+nrow (out4)
 ### testando outro formato para salvar 
 
 colnames(out4)
